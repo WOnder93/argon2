@@ -28,7 +28,7 @@ static const unsigned int blake2b_sigma[12][16] = {
         d = rotr64(d ^ a, 16); \
         c = c + d; \
         b = rotr64(b ^ c, 63); \
-    } while (0)
+    } while ((void)0, 0)
 
 #define ROUND(m, v, r) \
     do { \
@@ -40,7 +40,7 @@ static const unsigned int blake2b_sigma[12][16] = {
         G(m, r, 5, v[1], v[6], v[11], v[12]); \
         G(m, r, 6, v[2], v[7], v[ 8], v[13]); \
         G(m, r, 7, v[3], v[4], v[ 9], v[14]); \
-    } while (0)
+    } while ((void)0, 0)
 
 void blake2_update_block_default(uint64_t *state, const void *block,
                                  const uint64_t *t, uint64_t f0)

@@ -4,7 +4,8 @@
 
 #include "impl-select.h"
 
-#include "argon2.h"
+#include "argon2-sse2.h"
+#include "argon2-ssse3.h"
 
 #include "blake2/blake2.h"
 #include "blake2/blake2-common.h"
@@ -28,7 +29,7 @@
         d = rotr64(d ^ a, 16); \
         c = F(c, d); \
         b = rotr64(b ^ c, 63); \
-    } while (0)
+    } while ((void)0, 0)
 
 #define BLAKE2_ROUND_NOMSG(v0, v1, v2, v3, v4, v5, v6, v7, \
                            v8, v9, v10, v11, v12, v13, v14, v15) \
@@ -41,7 +42,7 @@
         G(v1, v6, v11, v12); \
         G(v2, v7, v8,  v13); \
         G(v3, v4, v9,  v14); \
-    } while(0)
+    } while ((void)0, 0)
 
 #define BLAKE2_ROUND_NOMSG1(v) \
     BLAKE2_ROUND_NOMSG( \
@@ -58,16 +59,16 @@
         (v)[ 96], (v)[ 97], (v)[112], (v)[113])
 
 static void fill_block(const block *prev_block, const block *ref_block,
-                       block *next_block)
+                       block *next_block, int with_xor)
 {
     block blockR, block_tmp;
 
     copy_block(&blockR, ref_block);
     xor_block(&blockR, prev_block);
     copy_block(&block_tmp, &blockR);
-
-    /* Now blockR = ref_block + prev_block and
-       bloc_tmp = ref_block + prev_block */
+    if (with_xor) {
+        xor_block(&block_tmp, next_block);
+    }
 
     /* Apply Blake2 on columns of 64-bit words: (0,1,...,15) , then
     (16,17,..31)... finally (112,113,...127) */
@@ -82,47 +83,6 @@ static void fill_block(const block *prev_block, const block *ref_block,
 
     /* Apply Blake2 on rows of 64-bit words: (0,1,16,17,...112,113), then
     (2,3,18,19,...,114,115).. finally (14,15,30,31,...,126,127) */
-    BLAKE2_ROUND_NOMSG2(blockR.v + 0 * 2);
-    BLAKE2_ROUND_NOMSG2(blockR.v + 1 * 2);
-    BLAKE2_ROUND_NOMSG2(blockR.v + 2 * 2);
-    BLAKE2_ROUND_NOMSG2(blockR.v + 3 * 2);
-    BLAKE2_ROUND_NOMSG2(blockR.v + 4 * 2);
-    BLAKE2_ROUND_NOMSG2(blockR.v + 5 * 2);
-    BLAKE2_ROUND_NOMSG2(blockR.v + 6 * 2);
-    BLAKE2_ROUND_NOMSG2(blockR.v + 7 * 2);
-
-    copy_block(next_block, &block_tmp);
-    xor_block(next_block, &blockR);
-}
-
-
-static void fill_block_with_xor(const block *prev_block, const block *ref_block,
-                                block *next_block)
-{
-    block blockR, block_tmp;
-
-    copy_block(&blockR, ref_block);
-    xor_block(&blockR, prev_block);
-    copy_block(&block_tmp, &blockR);
-    /* Saving the next block contents for XOR over: */
-    xor_block(&block_tmp, next_block);
-
-    /* Now blockR = ref_block + prev_block and
-       bloc_tmp = ref_block + prev_block + next_block*/
-
-    /* Apply Blake2 on columns of 64-bit words: (0,1,...,15) , then
-       (16,17,..31)... finally (112,113,...127) */
-    BLAKE2_ROUND_NOMSG1(blockR.v + 0 * 16);
-    BLAKE2_ROUND_NOMSG1(blockR.v + 1 * 16);
-    BLAKE2_ROUND_NOMSG1(blockR.v + 2 * 16);
-    BLAKE2_ROUND_NOMSG1(blockR.v + 3 * 16);
-    BLAKE2_ROUND_NOMSG1(blockR.v + 4 * 16);
-    BLAKE2_ROUND_NOMSG1(blockR.v + 5 * 16);
-    BLAKE2_ROUND_NOMSG1(blockR.v + 6 * 16);
-    BLAKE2_ROUND_NOMSG1(blockR.v + 7 * 16);
-
-    /* Apply Blake2 on rows of 64-bit words: (0,1,16,17,...112,113), then
-       (2,3,18,19,...,114,115).. finally (14,15,30,31,...,126,127) */
     BLAKE2_ROUND_NOMSG2(blockR.v + 0 * 2);
     BLAKE2_ROUND_NOMSG2(blockR.v + 1 * 2);
     BLAKE2_ROUND_NOMSG2(blockR.v + 2 * 2);
@@ -159,8 +119,8 @@ static void generate_addresses(const argon2_instance_t *instance,
                 input_block.v[6]++;
                 init_block_value(&tmp_block, 0);
                 init_block_value(&address_block, 0);
-                fill_block_with_xor(&zero_block, &input_block, &tmp_block);
-                fill_block_with_xor(&zero_block, &tmp_block, &address_block);
+                fill_block(&zero_block, &input_block, &tmp_block, 1);
+                fill_block(&zero_block, &tmp_block, &address_block, 1);
             }
 
             pseudo_rands[i] = address_block.v[i % ARGON2_ADDRESSES_IN_BLOCK];
@@ -171,12 +131,12 @@ static void generate_addresses(const argon2_instance_t *instance,
 void fill_segment_default(const argon2_instance_t *instance,
                           argon2_position_t position)
 {
-    block *ref_block = NULL, *curr_block = NULL;
+    block *ref_block, *curr_block, *prev_block;
     uint64_t pseudo_rand, ref_index, ref_lane;
     uint32_t prev_offset, curr_offset;
-    uint32_t starting_index;
-    uint32_t i;
+    uint32_t starting_index, i;
     int data_independent_addressing;
+
     /* Pseudo-random values that determine the reference block position */
     uint64_t *pseudo_rands = NULL;
 
@@ -188,7 +148,6 @@ void fill_segment_default(const argon2_instance_t *instance,
 
     pseudo_rands =
         (uint64_t *)malloc(sizeof(uint64_t) * (instance->segment_length));
-
     if (pseudo_rands == NULL) {
         return;
     }
@@ -242,24 +201,20 @@ void fill_segment_default(const argon2_instance_t *instance,
          * lane.
          */
         position.index = i;
-        ref_index = index_alpha(instance, &position, pseudo_rand & MASK_32,
+        ref_index = index_alpha(instance, &position, pseudo_rand & 0xFFFFFFFF,
                                 ref_lane == position.lane);
 
         /* 2 Creating a new block */
         ref_block =
             instance->memory + instance->lane_length * ref_lane + ref_index;
         curr_block = instance->memory + curr_offset;
-        if (ARGON2_VERSION_10 == instance->version) {
-            /* version 1.2.1 and earlier: overwrite, not XOR */
-            fill_block(instance->memory + prev_offset, ref_block, curr_block);
+        prev_block = instance->memory + prev_offset;
+
+        /* version 1.2.1 and earlier: overwrite, not XOR */
+        if (0 == position.pass || ARGON2_VERSION_10 == instance->version) {
+            fill_block(prev_block, ref_block, curr_block, 0);
         } else {
-            if(0 == position.pass) {
-                fill_block(instance->memory + prev_offset, ref_block,
-                           curr_block);
-            } else {
-                fill_block_with_xor(instance->memory + prev_offset, ref_block,
-                                    curr_block);
-            }
+            fill_block(prev_block, ref_block, curr_block, 1);
         }
     }
 
@@ -268,5 +223,12 @@ void fill_segment_default(const argon2_instance_t *instance,
 
 void argon2_get_impl_list(argon2_impl_list *list)
 {
-    list->count = 0;
+    static const argon2_impl IMPLS[] = {
+        { "SSSE3",          check_ssse3,    fill_segment_ssse3 },
+        { "SSE2",           check_sse2,     fill_segment_sse2 },
+        { "x86_64-generic", NULL,           fill_segment_default },
+    };
+
+    list->count = sizeof(IMPLS) / sizeof(IMPLS[0]);
+    list->entries = IMPLS;
 }

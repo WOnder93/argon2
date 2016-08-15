@@ -5,6 +5,7 @@
 
 typedef struct Argon2_impl {
     const char *name;
+    int (*check)(void);
     void (*fill_segment)(const argon2_instance_t *instance,
                          argon2_position_t position);
 } argon2_impl;
@@ -21,6 +22,7 @@ void fill_segment_default(const argon2_instance_t *instance,
 /* TODO: pass Blake2 state as a ptr to a struct */
 typedef struct Blake2_impl {
     const char *name;
+    int (*check)(void);
     void (*blake2_update_block)(uint64_t *state, const void *block,
                                 const uint64_t *t, uint64_t f0);
 } blake2_impl;
