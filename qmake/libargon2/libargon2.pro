@@ -37,9 +37,7 @@ HEADERS += \
     ../../lib/impl-select.h \
     ../../lib/thread.h \
     ../../lib/blake2/blake2.h \
-    ../../lib/blake2/blake2-impl.h \
-    ../../lib/blake2/blake2-opt.h \
-    ../../lib/blake2/blake2-common.h
+    ../../lib/blake2/blake2-impl.h
 
 equals(ARCH, x86_64) {
     USE_SSE2 {
@@ -55,8 +53,7 @@ equals(ARCH, x86_64) {
     SOURCES += \
         ../../$$ARCHDIR/lib/argon2-arch.c \
         ../../$$ARCHDIR/lib/argon2-sse2.c \
-        ../../$$ARCHDIR/lib/argon2-ssse3.c \
-        ../../$$ARCHDIR/lib/blake2/blake2-arch.c
+        ../../$$ARCHDIR/lib/argon2-ssse3.c
 
     HEADERS += \
         ../../$$ARCHDIR/lib/argon2-sse2.h \
@@ -64,8 +61,7 @@ equals(ARCH, x86_64) {
 }
 equals(ARCH, generic) {
     SOURCES += \
-        ../../$$ARCHDIR/lib/argon2-arch.c \
-        ../../$$ARCHDIR/lib/blake2/blake2-arch.c
+        ../../$$ARCHDIR/lib/argon2-arch.c
 }
 
 unix {

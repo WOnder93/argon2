@@ -31,9 +31,7 @@ libargon2_la_SOURCES = \
 	lib/impl-select.h \
 	lib/thread.h \
 	lib/blake2/blake2.h \
-	lib/blake2/blake2-common.h \
-	lib/blake2/blake2-impl.h \
-	lib/blake2/blake2-opt.h
+	lib/blake2/blake2-impl.h
 
 if ARCH_X86_64
 libargon2_arch_la_CPPFLAGS = $(AM_CPPFLAGS)
@@ -53,15 +51,13 @@ libargon2_arch_la_SOURCES = \
 	arch/@ARCH@/lib/argon2-arch.c \
 	arch/@ARCH@/lib/argon2-sse2.c \
 	arch/@ARCH@/lib/argon2-ssse3.c \
-	arch/@ARCH@/lib/blake2/blake2-arch.c \
 	arch/@ARCH@/lib/argon2-sse2.h \
 	arch/@ARCH@/lib/argon2-ssse3.h
 endif # ARCH_X86_64
 
 if ARCH_GENERIC
 libargon2_arch_la_SOURCES = \
-	arch/@ARCH@/lib/argon2-arch.c \
-	arch/@ARCH@/lib/blake2/blake2-arch.c
+	arch/@ARCH@/lib/argon2-arch.c
 endif # ARCH_GENERIC
 
 argon2_LDADD = libargon2.la

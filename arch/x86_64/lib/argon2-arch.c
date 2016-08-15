@@ -7,12 +7,8 @@
 #include "argon2-sse2.h"
 #include "argon2-ssse3.h"
 
-#include "blake2/blake2.h"
-#include "blake2/blake2-common.h"
-
 #include <x86intrin.h>
 
-#undef rotr64
 #define rotr64(x, n) _lrotr(x, n)
 
 #define MASK_32 UINT64_C(0xFFFFFFFF)

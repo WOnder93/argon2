@@ -4,12 +4,9 @@
 
 #include "impl-select.h"
 
-#include "argon2.h"
-
-#include "blake2/blake2.h"
-#include "blake2/blake2-common.h"
-
 #define MASK_32 UINT64_C(0xFFFFFFFF)
+
+#define rotr64(x, n) (((x) >> (n)) | ((x) << (64 - (n))))
 
 #define F(x, y) ((x) + (y) + 2 * ((x) & MASK_32) * ((y) & MASK_32))
 
