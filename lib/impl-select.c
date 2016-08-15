@@ -12,7 +12,7 @@
         } \
     } while((void)0, 0)
 
-#define BENCH_SAMPLES 2048
+#define BENCH_SAMPLES 512
 #define BENCH_MEM_BLOCKS 512
 
 static argon2_impl selected_argon_impl = {
