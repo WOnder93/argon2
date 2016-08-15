@@ -8,6 +8,7 @@
 #endif
 
 #include "argon2.h"
+#include "argon2-opt.h"
 
 static uint64_t rdtsc(void) {
 #ifdef _MSC_VER
@@ -60,7 +61,7 @@ static void benchmark() {
 
             clock_t start_time = clock();
             uint64_t start_cycles = rdtsc();
-            
+
             argon2d_hash_raw(t_cost, m_cost, thread_n, pwd_array, inlen,
                              salt_array, inlen, out, outlen);
             stop_cycles = rdtsc();
@@ -89,6 +90,7 @@ static void benchmark() {
 }
 
 int main() {
+    argon2_select_impl(stderr);
     benchmark();
     return ARGON2_OK;
 }

@@ -21,6 +21,7 @@
 #include <time.h>
 
 #include "argon2.h"
+#include "argon2-opt.h"
 #include "core.h"
 
 #define T_COST_DEF 3
@@ -175,6 +176,8 @@ int main(int argc, char *argv[]) {
         usage(argv[0]);
         return 1;
     }
+
+    argon2_select_impl(stderr);
 
     /* get password from stdin */
     n = fread(pwd, 1, sizeof pwd - 1, stdin);
