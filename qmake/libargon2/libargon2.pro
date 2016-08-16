@@ -9,15 +9,7 @@ QT       -= core gui
 TARGET = argon2
 TEMPLATE = lib
 
-isEmpty(ARCH) {
-    warning("ARCH not set, using 'generic'!")
-    ARCH = generic
-}
-
-ARCHDIR = arch/$$ARCH
-
 INCLUDEPATH += ../../include ../../lib
-INCLUDEPATH +=  ../../$$ARCHDIR/include ../../$$ARCHDIR/lib
 
 SOURCES += \
     ../../lib/argon2.c \
@@ -39,32 +31,11 @@ HEADERS += \
     ../../lib/blake2/blake2.h \
     ../../lib/blake2/blake2-impl.h
 
-equals(ARCH, x86_64) {
-    USE_SSE2 {
-        QMAKE_CFLAGS += -msse2
-        DEFINES += HAVE_SSE2
-    }
-    USE_SSSE3 {
-        # SSSE3 implies SSE2:
-        QMAKE_CFLAGS += -mssse3
-        DEFINES += HAVE_SSE2 HAVE_SSSE3
-    }
-
-    SOURCES += \
-        ../../$$ARCHDIR/lib/argon2-arch.c \
-        ../../$$ARCHDIR/lib/argon2-sse2.c \
-        ../../$$ARCHDIR/lib/argon2-ssse3.c
-
-    HEADERS += \
-        ../../$$ARCHDIR/lib/argon2-sse2.h \
-        ../../$$ARCHDIR/lib/argon2-ssse3.h
-}
-equals(ARCH, generic) {
-    SOURCES += \
-        ../../$$ARCHDIR/lib/argon2-arch.c
-}
-
 unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libargon2-arch/release/ -largon2-arch
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libargon2-arch/debug/ -largon2-arch
+else:unix: LIBS += -L$$OUT_PWD/../libargon2-arch/ -largon2-arch
