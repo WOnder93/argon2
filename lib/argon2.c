@@ -81,7 +81,7 @@ int argon2_hash(const uint32_t t_cost, const uint32_t m_cost,
                 const uint32_t parallelism, const void *pwd,
                 const size_t pwdlen, const void *salt, const size_t saltlen,
                 void *hash, const size_t hashlen, char *encoded,
-                const size_t encodedlen, argon2_type type, 
+                const size_t encodedlen, argon2_type type,
                 const uint32_t version){
 
     argon2_context context;
@@ -394,5 +394,5 @@ size_t argon2_encodedlen(uint32_t t_cost, uint32_t m_cost, uint32_t parallelism,
                          uint32_t saltlen, uint32_t hashlen) {
     return strlen("$argon2x$v=$m=,t=,p=$$") + numlen(t_cost) + numlen(m_cost)
         + numlen(parallelism) + b64len(saltlen) + b64len(hashlen)
-        + numlen(ARGON2_VERSION_NUMBER);
+        + numlen(ARGON2_VERSION_NUMBER) + 1;
 }
