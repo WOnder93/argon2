@@ -4,7 +4,7 @@ lib_LTLIBRARIES = libargon2.la libargon2-arch.la
 include_HEADERS = include/argon2.h include/argon2-opt.h
 
 bin_PROGRAMS = argon2
-noinst_PROGRAMS = argon2-bench
+noinst_PROGRAMS = argon2-bench argon2-bench2
 check_PROGRAMS = argon2-test
 
 TESTS = argon2-test
@@ -65,6 +65,9 @@ argon2_SOURCES = src/run.c lib/core.h
 
 argon2_bench_LDADD = libargon2.la
 argon2_bench_SOURCES = src/bench.c
+
+argon2_bench2_LDADD = libargon2.la
+argon2_bench2_SOURCES = src/bench2.c src/timing.h
 
 argon2_test_LDADD = libargon2.la
 argon2_test_SOURCES = tests/test.c
