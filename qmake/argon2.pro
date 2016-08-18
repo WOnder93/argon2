@@ -1,7 +1,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    libargon2-arch \
+    arch \
     libargon2 \
     argon2 \
     argon2-bench \
