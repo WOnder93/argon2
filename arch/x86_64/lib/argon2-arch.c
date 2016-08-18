@@ -221,10 +221,10 @@ void fill_segment_default(const argon2_instance_t *instance,
 void argon2_get_impl_list(argon2_impl_list *list)
 {
     static const argon2_impl IMPLS[] = {
-        { "XOP",    check_xop,      fill_segment_xop },
-        { "SSSE3",  check_ssse3,    fill_segment_ssse3 },
-        { "SSE2",   check_sse2,     fill_segment_sse2 },
         { "x86_64", NULL,           fill_segment_default },
+        { "SSE2",   check_sse2,     fill_segment_sse2 },
+        { "SSSE3",  check_ssse3,    fill_segment_ssse3 },
+        { "XOP",    check_xop,      fill_segment_xop },
     };
 
     list->count = sizeof(IMPLS) / sizeof(IMPLS[0]);
