@@ -21,8 +21,8 @@ After configuring the build environment, run `make check` to run the tests.
 You can specify the target architecture by passing the `--host=...` flag to `./configure`.
 
 Supported architectures:
- * `x86_64` -- 64-bit x86 architecture
- * `generic` -- use generic C impementation
+ * `x86_64` &ndash; 64-bit x86 architecture
+ * `generic` &ndash; use generic C impementation
 
 ## Using QMake/Qt Creator
 A [QMake](http://doc.qt.io/qt-4.8/qmake-manual.html) project is also available in the `qmake` directory. You can open it in the [Qt Creator IDE](http://wiki.qt.io/Category:Tools::QtCreator) or build it from terminal:
@@ -37,9 +37,9 @@ make
 For QMake builds you can configure support for different architectures. Use the `ARCH` variable to choose the architecture and the `CONFIG` variable to set additional options.
 
 Supported architectures:
- * `x86_64` -- 64-bit x86 architecture
+ * `x86_64` &ndash; 64-bit x86 architecture
    * QMake config flags:
-     * `USE_SSE2` -- use SSE2 instructions
-     * `USE_SSSE3` -- use SSSE3 instructions
-     * `USE_XOP` -- use XOP instructions
- * `generic` -- use generic C impementation
+     * `USE_SSE2` &ndash; use SSE2 instructions
+     * `USE_SSSE3` &ndash; use SSSE3 instructions
+     * `USE_XOP` &ndash; use XOP instructions
+ * `generic` &ndash; use generic C impementation
