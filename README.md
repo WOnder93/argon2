@@ -41,4 +41,5 @@ Supported architectures:
    * QMake config flags:
      * `USE_SSE2` -- use SSE2 instructions
      * `USE_SSSE3` -- use SSSE3 instructions
+     * `USE_XOP` -- use XOP instructions
  * `generic` -- use generic C impementation
