@@ -82,7 +82,7 @@ int main(void)
     uint32_t t_cost, m_cost, p;
     int res;
 
-    argon2_select_impl(stderr);
+    argon2_select_impl(stderr, "[libargon2] ");
 
     printf("%8s%16s%8s%16s%16s\n", "t_cost", "m_cost", "threads",
            "Argon2d (ms)", "Argon2i (ms)");

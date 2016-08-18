@@ -90,7 +90,7 @@ static void benchmark() {
 }
 
 int main() {
-    argon2_select_impl(stderr);
+    argon2_select_impl(stderr, "[libargon2] ");
     benchmark();
     return ARGON2_OK;
 }

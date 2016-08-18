@@ -56,7 +56,7 @@ int main() {
     char const *msg;
     int version;
 
-    argon2_select_impl(stderr);
+    argon2_select_impl(stderr, "[libargon2] ");
 
     version = ARGON2_VERSION_10;
     printf("Test Argon2i version number: %02x\n", version);

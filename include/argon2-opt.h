@@ -20,8 +20,10 @@ extern "C" {
  * Selects the fastest available optimized implementation.
  * @param out The file for debug output (e. g. stderr; pass NULL for no
  * debug output)
+ * @param prefix What to print before each line; NULL is equivalent to empty
+ * string
  */
-void argon2_select_impl(FILE *out);
+void argon2_select_impl(FILE *out, const char *prefix);
 
 #if defined(__cplusplus)
 }

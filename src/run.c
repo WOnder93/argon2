@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    argon2_select_impl(stderr);
+    argon2_select_impl(stderr, "[libargon2] ");
 
     /* get password from stdin */
     n = fread(pwd, 1, sizeof pwd - 1, stdin);

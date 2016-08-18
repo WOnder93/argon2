@@ -60,14 +60,14 @@ static uint64_t benchmark_impl(const argon2_impl *impl) {
     return bench;
 }
 
-static void select_impl(FILE *out)
+static void select_impl(FILE *out, const char *prefix)
 {
     argon2_impl_list impls;
     unsigned int i;
     const argon2_impl *best_impl = NULL;
     uint64_t best_bench = UINT_MAX;
 
-    log_maybe(out, "Selecting fill_segment function implementation...\n");
+    log_maybe(out, "%sSelecting best fill_segment implementation...\n", prefix);
 
     argon2_get_impl_list(&impls);
 
@@ -75,35 +75,35 @@ static void select_impl(FILE *out)
         const argon2_impl *impl = &impls.entries[i];
         uint64_t bench;
 
-        log_maybe(out, "  Checking implementation '%s'... ", impl->name);
-        if (!impl->check || impl->check()) {
-            log_maybe(out, "OK!\n");
+        log_maybe(out, "%s%s: Checking availability... ", prefix, impl->name);
+        if (impl->check != NULL && !impl->check()) {
+            log_maybe(out, "FAILED!\n");
+            continue;
+        }
+        log_maybe(out, "OK!\n");
 
-            log_maybe(out, "    Measuring...\n");
-            bench = benchmark_impl(impl);
-            log_maybe(out, "    Benchmark result: %llu\n",
-                    (unsigned long long)bench);
+        log_maybe(out, "%s%s: Benchmarking...\n", prefix, impl->name);
+        bench = benchmark_impl(impl);
+        log_maybe(out, "%s%s: Benchmark result: %llu\n", prefix, impl->name,
+                (unsigned long long)bench);
 
-            if (bench < best_bench) {
-                best_bench = bench;
-                best_impl = impl;
-            }
-        } else {
-            log_maybe(out, "CHECK FAILED!\n");
+        if (bench < best_bench) {
+            best_bench = bench;
+            best_impl = impl;
         }
     }
 
     if (best_impl != NULL) {
         log_maybe(out,
-                  "  Selecting best implementation: '%s' (bench %llu)...\n",
+                  "%sBest implementation: '%s' (bench %llu)\n", prefix,
                   best_impl->name, (unsigned long long)best_bench);
 
         selected_argon_impl = *best_impl;
     } else {
         log_maybe(out,
-                  "  No optimized implementation available, using default!\n");
+                  "%sNo optimized implementation available, using default!\n",
+                  prefix);
     }
-    log_maybe(out, "  Done!\n");
 }
 
 void fill_segment(const argon2_instance_t *instance, argon2_position_t position)
@@ -111,7 +111,10 @@ void fill_segment(const argon2_instance_t *instance, argon2_position_t position)
     selected_argon_impl.fill_segment(instance, position);
 }
 
-void argon2_select_impl(FILE *out)
+void argon2_select_impl(FILE *out, const char *prefix)
 {
-    select_impl(out);
+    if (prefix == NULL) {
+        prefix = "";
+    }
+    select_impl(out, prefix);
 }
