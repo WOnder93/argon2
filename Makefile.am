@@ -47,12 +47,19 @@ libargon2_arch_la_CPPFLAGS += -DHAVE_SSSE3
 libargon2_arch_la_CFLAGS += -mssse3
 endif # HAVE_SSSE3
 
+if HAVE_XOP
+libargon2_arch_la_CPPFLAGS += -DHAVE_XOP
+libargon2_arch_la_CFLAGS += -mxop
+endif # HAVE_XOP
+
 libargon2_arch_la_SOURCES = \
 	arch/@ARCH@/lib/argon2-arch.c \
 	arch/@ARCH@/lib/argon2-sse2.c \
 	arch/@ARCH@/lib/argon2-ssse3.c \
+	arch/@ARCH@/lib/argon2-xop.c \
 	arch/@ARCH@/lib/argon2-sse2.h \
-	arch/@ARCH@/lib/argon2-ssse3.h
+	arch/@ARCH@/lib/argon2-ssse3.h \
+	arch/@ARCH@/lib/argon2-xop.h
 endif # ARCH_X86_64
 
 if ARCH_GENERIC

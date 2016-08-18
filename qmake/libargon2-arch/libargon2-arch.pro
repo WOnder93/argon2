@@ -29,15 +29,22 @@ equals(ARCH, x86_64) {
         QMAKE_CFLAGS += -mssse3
         DEFINES += HAVE_SSE2 HAVE_SSSE3
     }
+    USE_XOP {
+        # XOP implies SSSE3 and SSE2:
+        QMAKE_CFLAGS += -mxop
+        DEFINES += HAVE_SSE2 HAVE_SSSE3 HAVE_XOP
+    }
 
     SOURCES += \
         ../../$$ARCHDIR/lib/argon2-arch.c \
         ../../$$ARCHDIR/lib/argon2-sse2.c \
-        ../../$$ARCHDIR/lib/argon2-ssse3.c
+        ../../$$ARCHDIR/lib/argon2-ssse3.c \
+        ../../$$ARCHDIR/lib/argon2-xop.c
 
     HEADERS += \
         ../../$$ARCHDIR/lib/argon2-sse2.h \
-        ../../$$ARCHDIR/lib/argon2-ssse3.h
+        ../../$$ARCHDIR/lib/argon2-ssse3.h \
+        ../../$$ARCHDIR/lib/argon2-xop.h
 }
 equals(ARCH, generic) {
     SOURCES += \
