@@ -42,4 +42,5 @@ Supported architectures:
      * `USE_SSE2` &ndash; use SSE2 instructions
      * `USE_SSSE3` &ndash; use SSSE3 instructions
      * `USE_XOP` &ndash; use XOP instructions
+     * `USE_AVX2` &ndash; use AVX2 instructions
  * `generic` &ndash; use generic C impementation
