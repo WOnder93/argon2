@@ -11,7 +11,7 @@ INCLUDEPATH += \
     $$ARGON2_ROOT/lib \
     $$ARGON2_ROOT/arch/$$ARCH/lib
 
-USE_SSSE3 | USE_XOP {
+USE_SSSE3 | USE_XOP | USE_AVX2 {
     DEFINES += HAVE_SSSE3
     QMAKE_CFLAGS += -mssse3
 }

@@ -37,11 +37,13 @@ if ARCH_X86_64
 noinst_LTLIBRARIES  += \
 	libargon2-sse2.la \
 	libargon2-ssse3.la \
-	libargon2-xop.la
+	libargon2-xop.la \
+	libargon2-avx2.la
 libargon2_la_LIBADD += \
 	libargon2-sse2.la \
 	libargon2-ssse3.la \
-	libargon2-xop.la
+	libargon2-xop.la \
+	libargon2-avx2.la
 
 libargon2_sse2_la_SOURCES = \
 	arch/@ARCH@/lib/argon2-sse2.c \
@@ -72,6 +74,16 @@ if HAVE_XOP
 libargon2_xop_la_CPPFLAGS += -DHAVE_XOP
 libargon2_xop_la_CFLAGS   += -mxop
 endif # HAVE_XOP
+
+libargon2_avx2_la_SOURCES = \
+	arch/@ARCH@/lib/argon2-avx2.c \
+	arch/@ARCH@/lib/argon2-avx2.h
+libargon2_avx2_la_CPPFLAGS = $(AM_CPPFLAGS)
+libargon2_avx2_la_CFLAGS   = $(AM_CFLAGS)
+if HAVE_AVX2
+libargon2_avx2_la_CPPFLAGS += -DHAVE_AVX2
+libargon2_avx2_la_CFLAGS   += -mavx2
+endif # HAVE_AVX2
 
 libargon2_la_SOURCES += \
 	arch/@ARCH@/lib/argon2-arch.c

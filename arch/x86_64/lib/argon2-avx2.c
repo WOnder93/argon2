@@ -1,29 +1,33 @@
-#include "argon2-ssse3.h"
+#include "argon2-avx2.h"
 
-#ifdef HAVE_SSSE3
+#ifdef HAVE_AVX2
 #include <string.h>
 
 #include <cpuid.h>
 #include <x86intrin.h>
 
-#define r16 (_mm_setr_epi8( \
+#define r16 (_mm256_setr_epi8( \
      2,  3,  4,  5,  6,  7,  0,  1, \
-    10, 11, 12, 13, 14, 15,  8,  9))
+    10, 11, 12, 13, 14, 15,  8,  9, \
+    18, 19, 20, 21, 22, 23, 16, 17, \
+    26, 27, 28, 29, 30, 31, 24, 25))
 
-#define r24 (_mm_setr_epi8( \
+#define r24 (_mm256_setr_epi8( \
      3,  4,  5,  6,  7,  0,  1,  2, \
-    11, 12, 13, 14, 15,  8,  9, 10))
+    11, 12, 13, 14, 15,  8,  9, 10, \
+    19, 20, 21, 22, 23, 16, 17, 18, \
+    27, 28, 29, 30, 31, 24, 25, 26))
 
-#define ror64_16(x) _mm_shuffle_epi8((x), r16)
-#define ror64_24(x) _mm_shuffle_epi8((x), r24)
-#define ror64_32(x) _mm_shuffle_epi32((x), _MM_SHUFFLE(2, 3, 0, 1))
+#define ror64_16(x) _mm256_shuffle_epi8((x), r16)
+#define ror64_24(x) _mm256_shuffle_epi8((x), r24)
+#define ror64_32(x) _mm256_shuffle_epi32((x), _MM_SHUFFLE(2, 3, 0, 1))
 #define ror64_63(x) \
-    _mm_xor_si128(_mm_srli_epi64((x), 63), _mm_add_epi64((x), (x)))
+    _mm256_xor_si256(_mm256_srli_epi64((x), 63), _mm256_add_epi64((x), (x)))
 
-static __m128i f(__m128i x, __m128i y)
+static __m256i f(__m256i x, __m256i y)
 {
-    __m128i z = _mm_mul_epu32(x, y);
-    return _mm_add_epi64(_mm_add_epi64(x, y), _mm_add_epi64(z, z));
+    __m256i z = _mm256_mul_epu32(x, y);
+    return _mm256_add_epi64(_mm256_add_epi64(x, y), _mm256_add_epi64(z, z));
 }
 
 #define G1(A0, B0, C0, D0, A1, B1, C1, D1) \
@@ -31,8 +35,8 @@ static __m128i f(__m128i x, __m128i y)
         A0 = f(A0, B0); \
         A1 = f(A1, B1); \
 \
-        D0 = _mm_xor_si128(D0, A0); \
-        D1 = _mm_xor_si128(D1, A1); \
+        D0 = _mm256_xor_si256(D0, A0); \
+        D1 = _mm256_xor_si256(D1, A1); \
 \
         D0 = ror64_32(D0); \
         D1 = ror64_32(D1); \
@@ -40,8 +44,8 @@ static __m128i f(__m128i x, __m128i y)
         C0 = f(C0, D0); \
         C1 = f(C1, D1); \
 \
-        B0 = _mm_xor_si128(B0, C0); \
-        B1 = _mm_xor_si128(B1, C1); \
+        B0 = _mm256_xor_si256(B0, C0); \
+        B1 = _mm256_xor_si256(B1, C1); \
 \
         B0 = ror64_24(B0); \
         B1 = ror64_24(B1); \
@@ -52,8 +56,8 @@ static __m128i f(__m128i x, __m128i y)
         A0 = f(A0, B0); \
         A1 = f(A1, B1); \
 \
-        D0 = _mm_xor_si128(D0, A0); \
-        D1 = _mm_xor_si128(D1, A1); \
+        D0 = _mm256_xor_si256(D0, A0); \
+        D1 = _mm256_xor_si256(D1, A1); \
 \
         D0 = ror64_16(D0); \
         D1 = ror64_16(D1); \
@@ -61,8 +65,8 @@ static __m128i f(__m128i x, __m128i y)
         C0 = f(C0, D0); \
         C1 = f(C1, D1); \
 \
-        B0 = _mm_xor_si128(B0, C0); \
-        B1 = _mm_xor_si128(B1, C1); \
+        B0 = _mm256_xor_si256(B0, C0); \
+        B1 = _mm256_xor_si256(B1, C1); \
 \
         B0 = ror64_63(B0); \
         B1 = ror64_63(B1); \
@@ -70,39 +74,29 @@ static __m128i f(__m128i x, __m128i y)
 
 #define DIAGONALIZE(A0, B0, C0, D0, A1, B1, C1, D1) \
     do { \
-        __m128i t0 = _mm_alignr_epi8(B1, B0, 8); \
-        __m128i t1 = _mm_alignr_epi8(B0, B1, 8); \
-        B0 = t0; \
-        B1 = t1; \
+        B0 = _mm256_permute4x64_epi64(B0, _MM_SHUFFLE(0, 3, 2, 1)); \
+        B1 = _mm256_permute4x64_epi64(B1, _MM_SHUFFLE(0, 3, 2, 1)); \
 \
-        t0 = C0; \
-        C0 = C1; \
-        C1 = t0; \
+        C0 = _mm256_permute4x64_epi64(C0, _MM_SHUFFLE(1, 0, 3, 2)); \
+        C1 = _mm256_permute4x64_epi64(C1, _MM_SHUFFLE(1, 0, 3, 2)); \
 \
-        t0 = _mm_alignr_epi8(D1, D0, 8); \
-        t1 = _mm_alignr_epi8(D0, D1, 8); \
-        D0 = t1; \
-        D1 = t0; \
+        D0 = _mm256_permute4x64_epi64(D0, _MM_SHUFFLE(2, 1, 0, 3)); \
+        D1 = _mm256_permute4x64_epi64(D1, _MM_SHUFFLE(2, 1, 0, 3)); \
     } while ((void)0, 0)
 
 #define UNDIAGONALIZE(A0, B0, C0, D0, A1, B1, C1, D1) \
     do { \
-        __m128i t0 = _mm_alignr_epi8(B0, B1, 8); \
-        __m128i t1 = _mm_alignr_epi8(B1, B0, 8); \
-        B0 = t0; \
-        B1 = t1; \
+        B0 = _mm256_permute4x64_epi64(B0, _MM_SHUFFLE(2, 1, 0, 3)); \
+        B1 = _mm256_permute4x64_epi64(B1, _MM_SHUFFLE(2, 1, 0, 3)); \
 \
-        t0 = C0; \
-        C0 = C1; \
-        C1 = t0; \
+        C0 = _mm256_permute4x64_epi64(C0, _MM_SHUFFLE(1, 0, 3, 2)); \
+        C1 = _mm256_permute4x64_epi64(C1, _MM_SHUFFLE(1, 0, 3, 2)); \
 \
-        t0 = _mm_alignr_epi8(D0, D1, 8); \
-        t1 = _mm_alignr_epi8(D1, D0, 8); \
-        D0 = t1; \
-        D1 = t0; \
+        D0 = _mm256_permute4x64_epi64(D0, _MM_SHUFFLE(0, 3, 2, 1)); \
+        D1 = _mm256_permute4x64_epi64(D1, _MM_SHUFFLE(0, 3, 2, 1)); \
     } while ((void)0, 0)
 
-#define BLAKE2_ROUND(A0, A1, B0, B1, C0, C1, D0, D1) \
+#define BLAKE2_ROUND(A0, B0, C0, D0, A1, B1, C1, D1) \
     do { \
         G1(A0, B0, C0, D0, A1, B1, C1, D1); \
         G2(A0, B0, C0, D0, A1, B1, C1, D1); \
@@ -115,42 +109,68 @@ static __m128i f(__m128i x, __m128i y)
         UNDIAGONALIZE(A0, B0, C0, D0, A1, B1, C1, D1); \
     } while ((void)0, 0)
 
-static void fill_block(__m128i *s, const block *ref_block, block *next_block,
+#define SWAP_HALVES(A0, A1) \
+    do { \
+        __m256i t0, t1; \
+        t0 = _mm256_permute2x128_si256(A0, A1, _MM_SHUFFLE(0, 2, 0, 0)); \
+        t1 = _mm256_permute2x128_si256(A0, A1, _MM_SHUFFLE(0, 3, 0, 1)); \
+        A0 = t0; \
+        A1 = t1; \
+    } while((void)0, 0)
+
+#define BLAKE2_ROUND2(A0, A1, B0, B1, C0, C1, D0, D1) \
+    do { \
+        SWAP_HALVES(A0, A1); \
+        SWAP_HALVES(B0, B1); \
+        SWAP_HALVES(C0, C1); \
+        SWAP_HALVES(D0, D1); \
+        BLAKE2_ROUND(A0, B0, C0, D0, A1, B1, C1, D1); \
+        SWAP_HALVES(A0, A1); \
+        SWAP_HALVES(B0, B1); \
+        SWAP_HALVES(C0, C1); \
+        SWAP_HALVES(D0, D1); \
+    } while ((void)0, 0)
+
+enum {
+    ARGON2_HWORDS_IN_BLOCK = ARGON2_OWORDS_IN_BLOCK / 2,
+};
+
+static void fill_block(__m256i *s, const block *ref_block, block *next_block,
                        int with_xor)
 {
-    __m128i block_XY[ARGON2_OWORDS_IN_BLOCK];
+    __m256i block_XY[ARGON2_HWORDS_IN_BLOCK];
     unsigned int i;
 
     if (with_xor) {
-        for (i = 0; i < ARGON2_OWORDS_IN_BLOCK; i++) {
-            s[i] =_mm_xor_si128(
-                s[i], _mm_loadu_si128((const __m128i *)ref_block->v + i));
-            block_XY[i] = _mm_xor_si128(
-                s[i], _mm_loadu_si128((const __m128i *)next_block->v + i));
+        for (i = 0; i < ARGON2_HWORDS_IN_BLOCK; i++) {
+            s[i] =_mm256_xor_si256(
+                s[i], _mm256_loadu_si256((const __m256i *)ref_block->v + i));
+            block_XY[i] = _mm256_xor_si256(
+                s[i], _mm256_loadu_si256((const __m256i *)next_block->v + i));
         }
 
     } else {
-        for (i = 0; i < ARGON2_OWORDS_IN_BLOCK; i++) {
-            block_XY[i] = s[i] =_mm_xor_si128(
-                s[i], _mm_loadu_si128((const __m128i *)ref_block->v + i));
+        for (i = 0; i < ARGON2_HWORDS_IN_BLOCK; i++) {
+            block_XY[i] = s[i] =_mm256_xor_si256(
+                s[i], _mm256_loadu_si256((const __m256i *)ref_block->v + i));
         }
     }
 
-    for (i = 0; i < 8; ++i) {
+    for (i = 0; i < 4; ++i) {
         BLAKE2_ROUND(
             s[8 * i + 0], s[8 * i + 1], s[8 * i + 2], s[8 * i + 3],
             s[8 * i + 4], s[8 * i + 5], s[8 * i + 6], s[8 * i + 7]);
     }
 
-    for (i = 0; i < 8; ++i) {
-        BLAKE2_ROUND(
-            s[8 * 0 + i], s[8 * 1 + i], s[8 * 2 + i], s[8 * 3 + i],
-            s[8 * 4 + i], s[8 * 5 + i], s[8 * 6 + i], s[8 * 7 + i]);
+    for (i = 0; i < 4; ++i) {
+        BLAKE2_ROUND2(
+            s[4 * 0 + i], s[4 * 1 + i], s[4 * 2 + i], s[4 * 3 + i],
+            s[4 * 4 + i], s[4 * 5 + i], s[4 * 6 + i], s[4 * 7 + i]);
     }
 
-    for (i = 0; i < ARGON2_OWORDS_IN_BLOCK; i++) {
-        s[i] = _mm_xor_si128(s[i], block_XY[i]);
-        _mm_storeu_si128((__m128i *)next_block->v + i, s[i]);
+    for (i = 0; i < ARGON2_HWORDS_IN_BLOCK; i++) {
+        s[i] = _mm256_xor_si256(s[i], block_XY[i]);
+        _mm256_storeu_si256((__m256i *)next_block->v + i, s[i]);
     }
 }
 
@@ -175,8 +195,8 @@ static void generate_addresses(const argon2_instance_t *instance,
         for (i = 0; i < instance->segment_length; ++i) {
             if (i % ARGON2_ADDRESSES_IN_BLOCK == 0) {
                 /*Temporary zero-initialized blocks*/
-                __m128i zero_block[ARGON2_OWORDS_IN_BLOCK];
-                __m128i zero2_block[ARGON2_OWORDS_IN_BLOCK];
+                __m256i zero_block[ARGON2_HWORDS_IN_BLOCK];
+                __m256i zero2_block[ARGON2_HWORDS_IN_BLOCK];
 
                 memset(zero_block, 0, sizeof(zero_block));
                 memset(zero2_block, 0, sizeof(zero2_block));
@@ -199,14 +219,14 @@ static void generate_addresses(const argon2_instance_t *instance,
     }
 }
 
-void fill_segment_ssse3(const argon2_instance_t *instance,
+void fill_segment_avx2(const argon2_instance_t *instance,
                         argon2_position_t position)
 {
     block *ref_block = NULL, *curr_block = NULL;
     uint64_t pseudo_rand, ref_index, ref_lane;
     uint32_t prev_offset, curr_offset;
     uint32_t starting_index, i;
-    __m128i state[ARGON2_OWORDS_IN_BLOCK];
+    __m256i state[ARGON2_HWORDS_IN_BLOCK];
     int data_independent_addressing;
 
     /* Pseudo-random values that determine the reference block position */
@@ -294,26 +314,35 @@ void fill_segment_ssse3(const argon2_instance_t *instance,
     free(pseudo_rands);
 }
 
-int check_ssse3(void)
+int check_avx2(void)
 {
-    /* Check if SSSE3 instructions are supported: */
+    /* Check if AVX2 instructions are supported: */
     unsigned int info[4];
     if (!__get_cpuid(0x00000001, &info[0], &info[1], &info[2], &info[3])) {
         return 0;
     }
     // FIXME: check also OS support!
-    return (info[3] & bit_SSE2) != 0 &&
-            (info[2] & bit_SSE3) != 0 &&
-            (info[2] & bit_SSSE3) != 0;
+    if ((info[2] & bit_AVX) == 0) {
+        return 0;
+    }
+    memset(info, 0, sizeof(info));
+    if (__get_cpuid_max(0, NULL) < 7) {
+        return 0;
+    }
+    __cpuid_count(7, 0, info[0], info[1], info[2], info[3]);
+    if ((info[1] & bit_AVX2) == 0) {
+        return 0;
+    }
+    return 1;
 }
 
 #else
 
-void fill_segment_ssse3(const argon2_instance_t *instance,
-                        argon2_position_t position)
+void fill_segment_avx2(const argon2_instance_t *instance,
+                       argon2_position_t position)
 {
 }
 
-int check_ssse3(void) { return 0; }
+int check_avx2(void) { return 0; }
 
 #endif
