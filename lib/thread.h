@@ -12,6 +12,7 @@
 */
 #if defined(_WIN32)
 #include <process.h>
+#include <stdint.h>
 typedef unsigned(__stdcall *argon2_thread_func_t)(void *);
 typedef uintptr_t argon2_thread_handle_t;
 #else
