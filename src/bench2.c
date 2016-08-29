@@ -143,7 +143,7 @@ int main(void)
     printf("%8s%16s%8s%16s%16s\n", "t_cost", "m_cost", "threads",
            "Argon2d (ms)", "Argon2i (ms)");
     for (t_cost = 1; t_cost <= BENCH_MAX_T_COST; t_cost *= 2) {
-        for (m_cost = 1024; m_cost <= BENCH_MAX_M_COST; m_cost *= 4) {
+        for (m_cost = 1024; m_cost <= BENCH_MAX_M_COST; m_cost *= 2) {
             for (p = 1; p <= BENCH_MAX_THREADS; p *= 2) {
                 res = benchmark(t_cost, m_cost, p);
                 if (res != 0) {
