@@ -1,15 +1,15 @@
 #include <stdlib.h>
 
 #ifdef _POSIX_SOURCE
-#include <sys/time.h>
+#include <time.h>
 
 struct timestamp {
-    struct timeval time;
+    struct timespec time;
 };
 
 static inline void timestamp_store(struct timestamp *out)
 {
-    gettimeofday(&out->time, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &out->time);
 }
 
 static inline double timestamp_span_ms(const struct timestamp *start,
@@ -17,7 +17,7 @@ static inline double timestamp_span_ms(const struct timestamp *start,
 {
     double res = 0.0;
     res += (end->time.tv_sec - start->time.tv_sec) * 1000.0;
-    res += (end->time.tv_usec - start->time.tv_usec) / 1000.0;
+    res += (end->time.tv_nsec - start->time.tv_nsec) / 1000000.0;
     return res;
 }
 #else
