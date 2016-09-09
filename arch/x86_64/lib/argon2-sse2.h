@@ -3,8 +3,6 @@
 
 #include "core.h"
 
-int check_sse2(void);
-
 void fill_segment_sse2(const argon2_instance_t *instance,
                        argon2_position_t position);
 

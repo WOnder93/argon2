@@ -3,7 +3,6 @@
 #ifdef HAVE_AVX2
 #include <string.h>
 
-#include <cpuid.h>
 #include <x86intrin.h>
 
 #define r16 (_mm256_setr_epi8( \
@@ -314,35 +313,11 @@ void fill_segment_avx2(const argon2_instance_t *instance,
     free(pseudo_rands);
 }
 
-int check_avx2(void)
-{
-    /* Check if AVX2 instructions are supported: */
-    unsigned int info[4];
-    if (!__get_cpuid(0x00000001, &info[0], &info[1], &info[2], &info[3])) {
-        return 0;
-    }
-    // FIXME: check also OS support!
-    if ((info[2] & bit_AVX) == 0) {
-        return 0;
-    }
-    memset(info, 0, sizeof(info));
-    if (__get_cpuid_max(0, NULL) < 7) {
-        return 0;
-    }
-    __cpuid_count(7, 0, info[0], info[1], info[2], info[3]);
-    if ((info[1] & bit_AVX2) == 0) {
-        return 0;
-    }
-    return 1;
-}
-
 #else
 
 void fill_segment_avx2(const argon2_instance_t *instance,
                        argon2_position_t position)
 {
 }
-
-int check_avx2(void) { return 0; }
 
 #endif

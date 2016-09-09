@@ -3,8 +3,6 @@
 
 #include "core.h"
 
-int check_xop(void);
-
 void fill_segment_xop(const argon2_instance_t *instance,
                       argon2_position_t position);
 

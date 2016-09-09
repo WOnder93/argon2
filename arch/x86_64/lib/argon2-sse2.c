@@ -3,7 +3,6 @@
 #ifdef HAVE_SSE2
 #include <string.h>
 
-#include <cpuid.h>
 #include <x86intrin.h>
 
 #define ror64(r, c) \
@@ -275,24 +274,11 @@ void fill_segment_sse2(const argon2_instance_t *instance,
     free(pseudo_rands);
 }
 
-int check_sse2(void)
-{
-    /* Check if SSE2 instructions are supported: */
-    unsigned int info[4];
-    if (!__get_cpuid(0x00000001, &info[0], &info[1], &info[2], &info[3])) {
-        return 0;
-    }
-    // FIXME: check also OS support!
-    return (info[3] & bit_SSE2) != 0;
-}
-
 #else
 
 void fill_segment_sse2(const argon2_instance_t *instance,
                        argon2_position_t position)
 {
 }
-
-int check_sse2(void) { return 0; }
 
 #endif

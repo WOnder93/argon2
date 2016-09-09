@@ -4,6 +4,7 @@
 
 #include "impl-select.h"
 
+#include "cpu-flags.h"
 #include "argon2-sse2.h"
 #include "argon2-ssse3.h"
 #include "argon2-xop.h"
@@ -221,13 +222,15 @@ void fill_segment_default(const argon2_instance_t *instance,
 
 void argon2_get_impl_list(argon2_impl_list *list)
 {
-    static const argon2_impl IMPLS[] = {
-        { "x86_64", NULL,           fill_segment_default },
-        { "SSE2",   check_sse2,     fill_segment_sse2 },
-        { "SSSE3",  check_ssse3,    fill_segment_ssse3 },
-        { "XOP",    check_xop,      fill_segment_xop },
-        { "AVX2",   check_avx2,     fill_segment_avx2 },
+    static argon2_impl IMPLS[] = {
+        { "x86_64", NULL,                   fill_segment_default },
+        { "SSE2",   cpu_flags_have_sse2,    fill_segment_sse2 },
+        { "SSSE3",  cpu_flags_have_ssse3,   fill_segment_ssse3 },
+        { "XOP",    cpu_flags_have_xop,     fill_segment_xop },
+        { "AVX2",   cpu_flags_have_avx2,    fill_segment_avx2 },
     };
+
+    cpu_flags_get();
 
     list->count = sizeof(IMPLS) / sizeof(IMPLS[0]);
     list->entries = IMPLS;

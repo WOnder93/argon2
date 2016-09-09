@@ -37,7 +37,11 @@ HEADERS += \
 
 equals(ARCH, x86_64) {
     SOURCES += \
+        $$ARGON2_ROOT/arch/$$ARCH/lib/cpu-flags.c \
         $$ARGON2_ROOT/arch/$$ARCH/lib/argon2-arch.c
+
+    HEADERS += \
+        $$ARGON2_ROOT/arch/$$ARCH/lib/cpu-flags.h
 
     # libargon2-sse2.a:
     win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../arch/x86_64/libargon2-sse2/release/ -largon2-sse2

@@ -282,35 +282,11 @@ void fill_segment_xop(const argon2_instance_t *instance,
     free(pseudo_rands);
 }
 
-int check_xop(void)
-{
-    /* Check if SSSE3 instructions are supported: */
-    unsigned int info[4];
-    if (!__get_cpuid(0x00000001, &info[0], &info[1], &info[2], &info[3])) {
-        return 0;
-    }
-    // FIXME: check also OS support!
-    if ((info[3] & bit_SSE2) == 0 ||
-            (info[2] & bit_SSE3) == 0 ||
-            (info[2] & bit_SSSE3) == 0) {
-        return 0;
-    }
-    if (!__get_cpuid(0x80000001, &info[0], &info[1], &info[2], &info[3])) {
-        return 0;
-    }
-    if ((info[2] & bit_XOP) == 0) {
-        return 0;
-    }
-    return 1;
-}
-
 #else
 
 void fill_segment_xop(const argon2_instance_t *instance,
                       argon2_position_t position)
 {
 }
-
-int check_xop(void) { return 0; }
 
 #endif

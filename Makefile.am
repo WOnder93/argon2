@@ -86,7 +86,9 @@ libargon2_avx2_la_CFLAGS   += -mavx2
 endif # HAVE_AVX2
 
 libargon2_la_SOURCES += \
-	arch/@ARCH@/lib/argon2-arch.c
+	arch/@ARCH@/lib/argon2-arch.c \
+	arch/@ARCH@/lib/cpu-flags.c \
+	arch/@ARCH@/lib/cpu-flags.h
 endif # ARCH_X86_64
 
 if ARCH_GENERIC

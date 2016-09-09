@@ -3,7 +3,6 @@
 #ifdef HAVE_SSSE3
 #include <string.h>
 
-#include <cpuid.h>
 #include <x86intrin.h>
 
 #define r16 (_mm_setr_epi8( \
@@ -294,26 +293,11 @@ void fill_segment_ssse3(const argon2_instance_t *instance,
     free(pseudo_rands);
 }
 
-int check_ssse3(void)
-{
-    /* Check if SSSE3 instructions are supported: */
-    unsigned int info[4];
-    if (!__get_cpuid(0x00000001, &info[0], &info[1], &info[2], &info[3])) {
-        return 0;
-    }
-    // FIXME: check also OS support!
-    return (info[3] & bit_SSE2) != 0 &&
-            (info[2] & bit_SSE3) != 0 &&
-            (info[2] & bit_SSSE3) != 0;
-}
-
 #else
 
 void fill_segment_ssse3(const argon2_instance_t *instance,
                         argon2_position_t position)
 {
 }
-
-int check_ssse3(void) { return 0; }
 
 #endif
