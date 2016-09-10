@@ -20,4 +20,5 @@ SOURCES += \
     $$ARGON2_ROOT/arch/x86_64/lib/argon2-ssse3.c
 
 HEADERS += \
-    $$ARGON2_ROOT/arch/x86_64/lib/argon2-ssse3.h
+    $$ARGON2_ROOT/arch/x86_64/lib/argon2-ssse3.h \
+    $$ARGON2_ROOT/arch/x86_64/lib/argon2-template-128.h

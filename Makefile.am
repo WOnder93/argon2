@@ -47,7 +47,8 @@ libargon2_la_LIBADD += \
 
 libargon2_sse2_la_SOURCES = \
 	arch/@ARCH@/lib/argon2-sse2.c \
-	arch/@ARCH@/lib/argon2-sse2.h
+	arch/@ARCH@/lib/argon2-sse2.h \
+	arch/@ARCH@/lib/argon2-template-128.h
 libargon2_sse2_la_CPPFLAGS = $(AM_CPPFLAGS)
 libargon2_sse2_la_CFLAGS   = $(AM_CFLAGS)
 if HAVE_SSE2
@@ -57,7 +58,8 @@ endif # HAVE_SSE2
 
 libargon2_ssse3_la_SOURCES = \
 	arch/@ARCH@/lib/argon2-ssse3.c \
-	arch/@ARCH@/lib/argon2-ssse3.h
+	arch/@ARCH@/lib/argon2-ssse3.h \
+	arch/@ARCH@/lib/argon2-template-128.h
 libargon2_ssse3_la_CPPFLAGS = $(AM_CPPFLAGS)
 libargon2_ssse3_la_CFLAGS   = $(AM_CFLAGS)
 if HAVE_SSSE3
@@ -67,7 +69,8 @@ endif # HAVE_SSSE3
 
 libargon2_xop_la_SOURCES = \
 	arch/@ARCH@/lib/argon2-xop.c \
-	arch/@ARCH@/lib/argon2-xop.h
+	arch/@ARCH@/lib/argon2-xop.h \
+	arch/@ARCH@/lib/argon2-template-128.h
 libargon2_xop_la_CPPFLAGS = $(AM_CPPFLAGS)
 libargon2_xop_la_CFLAGS   = $(AM_CFLAGS)
 if HAVE_XOP
