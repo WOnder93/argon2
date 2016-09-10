@@ -74,10 +74,6 @@ static __m128i f(__m128i x, __m128i y)
         B0 = t0; \
         B1 = t1; \
 \
-        t0 = C0; \
-        C0 = C1; \
-        C1 = t0; \
-\
         t0 = _mm_alignr_epi8(D1, D0, 8); \
         t1 = _mm_alignr_epi8(D0, D1, 8); \
         D0 = t1; \
@@ -90,10 +86,6 @@ static __m128i f(__m128i x, __m128i y)
         __m128i t1 = _mm_alignr_epi8(B1, B0, 8); \
         B0 = t0; \
         B1 = t1; \
-\
-        t0 = C0; \
-        C0 = C1; \
-        C1 = t0; \
 \
         t0 = _mm_alignr_epi8(D0, D1, 8); \
         t1 = _mm_alignr_epi8(D1, D0, 8); \
@@ -108,8 +100,8 @@ static __m128i f(__m128i x, __m128i y)
 \
         DIAGONALIZE(A0, B0, C0, D0, A1, B1, C1, D1); \
 \
-        G1(A0, B0, C0, D0, A1, B1, C1, D1); \
-        G2(A0, B0, C0, D0, A1, B1, C1, D1); \
+        G1(A0, B0, C1, D0, A1, B1, C0, D1); \
+        G2(A0, B0, C1, D0, A1, B1, C0, D1); \
 \
         UNDIAGONALIZE(A0, B0, C0, D0, A1, B1, C1, D1); \
     } while ((void)0, 0)
