@@ -93,7 +93,7 @@ static void generate_addresses(const argon2_instance_t *instance,
                                const argon2_position_t *position,
                                uint64_t *pseudo_rands)
 {
-    block zero_block, input_block, address_block,tmp_block;
+    block zero_block, input_block, address_block, tmp_block;
     uint32_t i;
 
     init_block_value(&zero_block, 0);
@@ -110,10 +110,8 @@ static void generate_addresses(const argon2_instance_t *instance,
         for (i = 0; i < instance->segment_length; ++i) {
             if (i % ARGON2_ADDRESSES_IN_BLOCK == 0) {
                 input_block.v[6]++;
-                init_block_value(&tmp_block, 0);
-                init_block_value(&address_block, 0);
-                fill_block(&zero_block, &input_block, &tmp_block, 1);
-                fill_block(&zero_block, &tmp_block, &address_block, 1);
+                fill_block(&zero_block, &input_block, &tmp_block, 0);
+                fill_block(&zero_block, &tmp_block, &address_block, 0);
             }
 
             pseudo_rands[i] = address_block.v[i % ARGON2_ADDRESSES_IN_BLOCK];
