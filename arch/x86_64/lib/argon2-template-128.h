@@ -42,7 +42,7 @@ static void fill_block(__m128i *s, const block *ref_block, block *next_block,
     }
 }
 
-static void generate_addresses(block *address_block, block *input_block)
+static void next_addresses(block *address_block, block *input_block)
 {
     /*Temporary zero-initialized blocks*/
     __m128i zero_block[ARGON2_OWORDS_IN_BLOCK];
@@ -94,9 +94,9 @@ static void fill_segment_128(const argon2_instance_t *instance,
     if ((0 == position.pass) && (0 == position.slice)) {
         starting_index = 2; /* we have already generated the first two blocks */
 
-        /* Don't forget to generate the first set of addresses: */
+        /* Don't forget to generate the first block of addresses: */
         if (data_independent_addressing) {
-            generate_addresses(&address_block, &input_block);
+            next_addresses(&address_block, &input_block);
         }
     }
 
@@ -125,7 +125,7 @@ static void fill_segment_128(const argon2_instance_t *instance,
         /* 1.2.1 Taking pseudo-random value from the previous block */
         if (data_independent_addressing) {
             if (i % ARGON2_ADDRESSES_IN_BLOCK == 0) {
-                generate_addresses(&address_block, &input_block);
+                next_addresses(&address_block, &input_block);
             }
             pseudo_rand = address_block.v[i % ARGON2_ADDRESSES_IN_BLOCK];
         } else {
