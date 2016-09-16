@@ -4,10 +4,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#ifndef _POSIX_SOURCE
-#error "This program will only compile on POSIX systems!"
-#endif
-
 #include "argon2.h"
 #include "argon2-opt.h"
 
