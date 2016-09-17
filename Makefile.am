@@ -25,6 +25,7 @@ libargon2_la_SOURCES = \
 	lib/impl-select.c \
 	lib/thread.c \
 	lib/blake2/blake2.c \
+	lib/argon2-template-64.h \
 	lib/core.h \
 	lib/encoding.h \
 	lib/genkat.h \
