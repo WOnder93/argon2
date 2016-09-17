@@ -5,7 +5,7 @@ lib_LTLIBRARIES = libargon2.la
 noinst_LTLIBRARIES =
 
 bin_PROGRAMS = argon2
-noinst_PROGRAMS = argon2-bench2 argon2-test
+noinst_PROGRAMS = argon2-genkat argon2-bench2 argon2-test
 
 TESTS = argon2-test
 
@@ -102,6 +102,9 @@ endif # ARCH_GENERIC
 
 argon2_LDADD = libargon2.la
 argon2_SOURCES = src/run.c lib/core.h
+
+argon2_genkat_LDADD = libargon2.la
+argon2_genkat_SOURCES = src/genkat.c
 
 argon2_bench2_LDADD = libargon2.la
 argon2_bench2_SOURCES = src/bench2.c src/timing.h
