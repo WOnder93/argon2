@@ -3,6 +3,8 @@
 #ifdef HAVE_SSE2
 #include <x86intrin.h>
 
+#include "cpu-flags.h"
+
 #define ror64(r, c) \
     _mm_xor_si128(_mm_srli_epi64((r), (c)), _mm_slli_epi64((r), 64 - (c)))
 
@@ -95,11 +97,21 @@ void fill_segment_sse2(const argon2_instance_t *instance,
     fill_segment_128(instance, position);
 }
 
+int check_sse2(void)
+{
+    return cpu_flags_have_sse2();
+}
+
 #else
 
 void fill_segment_sse2(const argon2_instance_t *instance,
                        argon2_position_t position)
 {
+}
+
+int check_sse2(void)
+{
+    return 0;
 }
 
 #endif

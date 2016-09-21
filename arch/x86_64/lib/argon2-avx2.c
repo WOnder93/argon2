@@ -5,6 +5,8 @@
 
 #include <x86intrin.h>
 
+#include "cpu-flags.h"
+
 #define r16 (_mm256_setr_epi8( \
      2,  3,  4,  5,  6,  7,  0,  1, \
     10, 11, 12, 13, 14, 15,  8,  9, \
@@ -292,11 +294,21 @@ void fill_segment_avx2(const argon2_instance_t *instance,
     }
 }
 
+int check_avx2(void)
+{
+    return cpu_flags_have_avx2();
+}
+
 #else
 
 void fill_segment_avx2(const argon2_instance_t *instance,
                        argon2_position_t position)
 {
+}
+
+int check_avx2(void)
+{
+    return 0;
 }
 
 #endif
