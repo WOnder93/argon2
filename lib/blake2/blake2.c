@@ -219,5 +219,7 @@ void blake2b_long(void *out, size_t outlen, const void *in, size_t inlen)
         blake2b_final(&blake_state, out_buffer, toproduce);
 
         memcpy(pout, out_buffer, toproduce);
+
+        secure_wipe_memory(out_buffer, sizeof(out_buffer));
     }
 }
