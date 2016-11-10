@@ -115,7 +115,7 @@ static int benchmark(uint32_t t_cost, uint32_t m_cost, uint32_t p)
     ms_d_final = min(ms_d, bench_samples);
     ms_i_final = min(ms_i, bench_samples);
 
-    printf("%8lu%16lu%8lu%16.3lf%16.3lf\n",
+    printf("%8lu%16lu%8lu%16.6lf%16.6lf\n",
            (unsigned long)t_cost, (unsigned long)m_cost, (unsigned long)p,
            ms_d_final, ms_i_final);
     return 0;
