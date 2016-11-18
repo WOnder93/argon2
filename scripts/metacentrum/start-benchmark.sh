@@ -33,8 +33,7 @@ cat >$task_file <<EOF
 #!/bin/bash
 #PBS -N argon2-gpu-$machine-$branch
 #PBS -l walltime=$duration
-#PBS -l nodes=1:ppn=1:cl_$machine
-#PBS -l gpu=1
+#PBS -l nodes=1:ppn=16:cl_$machine
 #PBS -q $queue
 #PBS -l mem=16gb
 
