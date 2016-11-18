@@ -45,7 +45,7 @@ cd argon2 || exit 1
 
 git checkout "$branch" || exit 1
 
-(cmake . && make) || exit 1
+(autoreconf -i && ./configure && make) || exit 1
 
 if [ "$run_tests" == "yes" ]; then
     make check
