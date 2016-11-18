@@ -16,7 +16,7 @@ if [ -z "$branch" ]; then
 fi
 
 if [ -z "$duration" ]; then
-    duration=1d
+    duration=1h
 fi
 
 REPO_URL='https://github.com/WOnder93/argon2.git'
