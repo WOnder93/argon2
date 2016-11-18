@@ -19,10 +19,6 @@ if [ -z "$duration" ]; then
     duration=1d
 fi
 
-if [ -z "$queue" ]; then
-    queue=gpu
-fi
-
 REPO_URL='https://github.com/WOnder93/argon2.git'
 
 dest_dir="$(pwd)"
@@ -31,11 +27,11 @@ task_file="$(mktemp)"
 
 cat >$task_file <<EOF
 #!/bin/bash
-#PBS -N argon2-gpu-$machine-$branch
+#PBS -N argon2-cpu-$machine-$branch
 #PBS -l walltime=$duration
 #PBS -l nodes=1:ppn=16:cl_$machine
-#PBS -q $queue
 #PBS -l mem=16gb
+$(if [ -n "$queue" ]; then echo "#PBS -q $queue"; fi)
 
 module add cmake-3.6.1
 
