@@ -2,7 +2,7 @@
 
 dirname="$(dirname "$0")"
 
-cd "$dirname/.." || exit 1
+cd "$dirname" || exit 1
 
 ./start-benchmark.sh luna
 ./start-benchmark.sh lex '' '' '' '' '' backfill
