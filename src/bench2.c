@@ -121,16 +121,45 @@ static int benchmark(uint32_t t_cost, uint32_t m_cost, uint32_t p)
     return 0;
 }
 
-int main(void)
+int main(int argc, const char * const *argv)
 {
+    uint32_t max_t_cost = BENCH_MAX_T_COST;
+    uint32_t max_m_cost = BENCH_MAX_M_COST;
+    uint32_t max_p = BENCH_MAX_THREADS;
     uint32_t t_cost, m_cost, p;
+    char *end;
     int res;
+
+    if (argc >= 2) {
+        max_t_cost = strtoul(argv[1], &end, 10);
+        if (end == argv[1]) {
+            fprintf(stderr, "ERROR: Invalid number format!\n");
+            return 1;
+        }
+    }
+
+    if (argc >= 3) {
+        max_m_cost = strtoul(argv[2], &end, 10);
+        if (end == argv[2]) {
+            fprintf(stderr, "ERROR: Invalid number format!\n");
+            return 1;
+        }
+    }
+
+    if (argc >= 4) {
+        max_p = strtoul(argv[3], &end, 10);
+        if (end == argv[3]) {
+            fprintf(stderr, "ERROR: Invalid number format!\n");
+            return 1;
+        }
+    }
 
     argon2_select_impl(stderr, "[libargon2] ");
 
-    static_memory_size = (size_t)BENCH_MAX_M_COST * (size_t)ARGON2_BLOCK_SIZE;
+    static_memory_size = (size_t)max_m_cost * (size_t)ARGON2_BLOCK_SIZE;
     static_memory = malloc(static_memory_size);
     if (static_memory == NULL) {
+        fprintf(stderr, "ERROR: Memory allocation failed!\n");
         return 1;
     }
     /* make sure the whole memory gets mapped to physical pages: */
@@ -138,9 +167,9 @@ int main(void)
 
     printf("%8s%16s%8s%16s%16s\n", "t_cost", "m_cost", "threads",
            "Argon2d (ms)", "Argon2i (ms)");
-    for (t_cost = 1; t_cost <= BENCH_MAX_T_COST; t_cost *= 2) {
-        for (m_cost = 64; m_cost <= BENCH_MAX_M_COST; m_cost *= 2) {
-            for (p = 1; p <= BENCH_MAX_THREADS; p *= 2) {
+    for (t_cost = 1; t_cost <= max_t_cost; t_cost *= 2) {
+        for (m_cost = 64; m_cost <= max_m_cost; m_cost *= 2) {
+            for (p = 1; p <= max_p; p *= 2) {
                 res = benchmark(t_cost, m_cost, p);
                 if (res != 0) {
                     free(static_memory);
