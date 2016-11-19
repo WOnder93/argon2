@@ -168,7 +168,8 @@ int main(int argc, const char * const *argv)
     printf("%8s%16s%8s%16s%16s\n", "t_cost", "m_cost", "threads",
            "Argon2d (ms)", "Argon2i (ms)");
     for (t_cost = 1; t_cost <= max_t_cost; t_cost *= 2) {
-        for (m_cost = 64; m_cost <= max_m_cost; m_cost *= 2) {
+        uint32_t min_m_cost = max_p * ARGON2_SYNC_POINTS * 2;
+        for (m_cost = min_m_cost; m_cost <= max_m_cost; m_cost *= 2) {
             for (p = 1; p <= max_p; p *= 2) {
                 res = benchmark(t_cost, m_cost, p);
                 if (res != 0) {
