@@ -13,7 +13,7 @@
 
 #define BENCH_MAX_T_COST 16
 #define BENCH_MAX_M_COST (1024 * 1024)
-#define BENCH_MAX_THREADS 8
+#define BENCH_MAX_THREADS 16
 #define BENCH_MIN_PASSES (1024 * 1024)
 #define BENCH_MAX_SAMPLES 128
 
@@ -180,7 +180,7 @@ int main(int argc, const char * const *argv)
 
     printf("%8s%16s%8s%16s%16s%16s\n", "t_cost", "m_cost", "threads",
            "Argon2d (ms)", "Argon2i (ms)", "Argon2id (ms)");
-    for (t_cost = 1; t_cost <= max_t_cost; t_cost *= 2) {
+    for (t_cost = 1; t_cost <= max_t_cost; t_cost++) {
         uint32_t min_m_cost = max_p * ARGON2_SYNC_POINTS * 2;
         for (m_cost = min_m_cost; m_cost <= max_m_cost; m_cost *= 2) {
             for (p = 1; p <= max_p; p *= 2) {
