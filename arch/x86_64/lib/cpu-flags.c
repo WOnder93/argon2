@@ -7,6 +7,7 @@ enum {
     X86_64_FEATURE_SSSE3    = (1 << 1),
     X86_64_FEATURE_XOP      = (1 << 2),
     X86_64_FEATURE_AVX2     = (1 << 3),
+    X86_64_FEATURE_AVX512F  = (1 << 4),
 };
 
 static unsigned int cpu_flags;
@@ -51,6 +52,9 @@ void cpu_flags_get(void)
         if (ebx & bit_AVX2) {
             cpu_flags |= X86_64_FEATURE_AVX2;
         }
+        if (ebx & bit_AVX512F) {
+            cpu_flags |= X86_64_FEATURE_AVX512F;
+        }
     }
     if (level_ext >= 1 && get_cpuid(1, 1, &ebx, &ecx, &edx)) {
         if (ecx & bit_XOP) {
@@ -78,5 +82,10 @@ int cpu_flags_have_xop(void)
 int cpu_flags_have_avx2(void)
 {
     return cpu_flags & X86_64_FEATURE_AVX2;
+}
+
+int cpu_flags_have_avx512f(void)
+{
+    return cpu_flags & X86_64_FEATURE_AVX512F;
 }
 

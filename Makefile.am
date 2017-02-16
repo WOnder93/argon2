@@ -39,12 +39,14 @@ noinst_LTLIBRARIES  += \
 	libargon2-sse2.la \
 	libargon2-ssse3.la \
 	libargon2-xop.la \
-	libargon2-avx2.la
+	libargon2-avx2.la \
+	libargon2-avx512f.la
 libargon2_la_LIBADD += \
 	libargon2-sse2.la \
 	libargon2-ssse3.la \
 	libargon2-xop.la \
-	libargon2-avx2.la
+	libargon2-avx2.la \
+	libargon2-avx512f.la
 
 libargon2_sse2_la_SOURCES = \
 	arch/@ARCH@/lib/argon2-sse2.c \
@@ -88,6 +90,16 @@ if HAVE_AVX2
 libargon2_avx2_la_CPPFLAGS += -DHAVE_AVX2
 libargon2_avx2_la_CFLAGS   += -mavx2
 endif # HAVE_AVX2
+
+libargon2_avx512f_la_SOURCES = \
+	arch/@ARCH@/lib/argon2-avx512f.c \
+	arch/@ARCH@/lib/argon2-avx512f.h
+libargon2_avx512f_la_CPPFLAGS = $(AM_CPPFLAGS)
+libargon2_avx512f_la_CFLAGS   = $(AM_CFLAGS)
+if HAVE_AVX512F
+libargon2_avx512f_la_CPPFLAGS += -DHAVE_AVX512F
+libargon2_avx512f_la_CFLAGS   += -mavx512f
+endif # HAVE_AVX512F
 
 libargon2_la_SOURCES += \
 	arch/@ARCH@/lib/argon2-arch.c \
