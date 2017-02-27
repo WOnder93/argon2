@@ -5,8 +5,15 @@
 
 #include "cpu-flags.h"
 
-#define ror64(r, c) \
-    _mm_xor_si128(_mm_srli_epi64((r), (c)), _mm_slli_epi64((r), 64 - (c)))
+#define ror64_16(x) \
+    _mm_shufflehi_epi16( \
+        _mm_shufflelo_epi16((x), _MM_SHUFFLE(0, 3, 2, 1)), \
+        _MM_SHUFFLE(0, 3, 2, 1))
+#define ror64_24(x) \
+    _mm_xor_si128(_mm_srli_epi64((x), 24), _mm_slli_epi64((x), 40))
+#define ror64_32(x) _mm_shuffle_epi32((x), _MM_SHUFFLE(2, 3, 0, 1))
+#define ror64_63(x) \
+    _mm_xor_si128(_mm_srli_epi64((x), 63), _mm_add_epi64((x), (x)))
 
 static __m128i f(__m128i x, __m128i y)
 {
@@ -22,8 +29,8 @@ static __m128i f(__m128i x, __m128i y)
         D0 = _mm_xor_si128(D0, A0); \
         D1 = _mm_xor_si128(D1, A1); \
 \
-        D0 = ror64(D0, 32); \
-        D1 = ror64(D1, 32); \
+        D0 = ror64_32(D0); \
+        D1 = ror64_32(D1); \
 \
         C0 = f(C0, D0); \
         C1 = f(C1, D1); \
@@ -31,8 +38,8 @@ static __m128i f(__m128i x, __m128i y)
         B0 = _mm_xor_si128(B0, C0); \
         B1 = _mm_xor_si128(B1, C1); \
 \
-        B0 = ror64(B0, 24); \
-        B1 = ror64(B1, 24); \
+        B0 = ror64_24(B0); \
+        B1 = ror64_24(B1); \
     } while ((void)0, 0)
 
 #define G2(A0, B0, C0, D0, A1, B1, C1, D1) \
@@ -43,8 +50,8 @@ static __m128i f(__m128i x, __m128i y)
         D0 = _mm_xor_si128(D0, A0); \
         D1 = _mm_xor_si128(D1, A1); \
 \
-        D0 = ror64(D0, 16); \
-        D1 = ror64(D1, 16); \
+        D0 = ror64_16(D0); \
+        D1 = ror64_16(D1); \
 \
         C0 = f(C0, D0); \
         C1 = f(C1, D1); \
@@ -52,8 +59,8 @@ static __m128i f(__m128i x, __m128i y)
         B0 = _mm_xor_si128(B0, C0); \
         B1 = _mm_xor_si128(B1, C1); \
 \
-        B0 = ror64(B0, 63); \
-        B1 = ror64(B1, 63); \
+        B0 = ror64_63(B0); \
+        B1 = ror64_63(B1); \
     } while ((void)0, 0)
 
 #define DIAGONALIZE(A0, B0, C0, D0, A1, B1, C1, D1) \
