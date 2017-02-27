@@ -43,4 +43,5 @@ Supported architectures:
      * `USE_SSSE3` &ndash; use SSSE3 instructions
      * `USE_XOP` &ndash; use XOP instructions
      * `USE_AVX2` &ndash; use AVX2 instructions
+     * `USE_AVX512F` &ndash; use AVX-512F instructions
  * `generic` &ndash; use generic C impementation
