@@ -59,8 +59,9 @@ static int benchmark(uint32_t t_cost, uint32_t m_cost, uint32_t p)
     struct timestamp start, end;
     double ms_d[BENCH_MAX_SAMPLES];
     double ms_i[BENCH_MAX_SAMPLES];
+    double ms_id[BENCH_MAX_SAMPLES];
 
-    double ms_d_final, ms_i_final;
+    double ms_d_final, ms_i_final, ms_id_final;
     unsigned int i, bench_samples;
     argon2_context ctx;
 
@@ -112,12 +113,24 @@ static int benchmark(uint32_t t_cost, uint32_t m_cost, uint32_t p)
         ms_i[i] = timestamp_span_ms(&start, &end);
     }
 
+    for (i = 0; i < bench_samples; i++) {
+        timestamp_store(&start);
+        res = argon2id_ctx(&ctx);
+        timestamp_store(&end);
+        if (res != ARGON2_OK) {
+            return res;
+        }
+
+        ms_id[i] = timestamp_span_ms(&start, &end);
+    }
+
     ms_d_final = min(ms_d, bench_samples);
     ms_i_final = min(ms_i, bench_samples);
+    ms_id_final = min(ms_id, bench_samples);
 
-    printf("%8lu%16lu%8lu%16.6lf%16.6lf\n",
+    printf("%8lu%16lu%8lu%16.6lf%16.6lf%16.6lf\n",
            (unsigned long)t_cost, (unsigned long)m_cost, (unsigned long)p,
-           ms_d_final, ms_i_final);
+           ms_d_final, ms_i_final, ms_id_final);
     return 0;
 }
 
@@ -165,8 +178,8 @@ int main(int argc, const char * const *argv)
     /* make sure the whole memory gets mapped to physical pages: */
     memset(static_memory, 0xAB, static_memory_size);
 
-    printf("%8s%16s%8s%16s%16s\n", "t_cost", "m_cost", "threads",
-           "Argon2d (ms)", "Argon2i (ms)");
+    printf("%8s%16s%8s%16s%16s%16s\n", "t_cost", "m_cost", "threads",
+           "Argon2d (ms)", "Argon2i (ms)", "Argon2id (ms)");
     for (t_cost = 1; t_cost <= max_t_cost; t_cost *= 2) {
         uint32_t min_m_cost = max_p * ARGON2_SYNC_POINTS * 2;
         for (m_cost = min_m_cost; m_cost <= max_m_cost; m_cost *= 2) {

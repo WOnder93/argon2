@@ -10,7 +10,7 @@ static void fatal(const char *error) {
     exit(1);
 }
 
-static void generate_testvectors(const char *type, const uint32_t version) {
+static void generate_testvectors(argon2_type type, const uint32_t version) {
 #define TEST_OUTLEN 32
 #define TEST_PWDLEN 32
 #define TEST_SALTLEN 16
@@ -37,7 +37,7 @@ static void generate_testvectors(const char *type, const uint32_t version) {
 
     context.out = out;
     context.outlen = TEST_OUTLEN;
-    context.version = ARGON2_VERSION_NUMBER;
+    context.version = version;
     context.pwd = pwd;
     context.pwdlen = TEST_PWDLEN;
     context.salt = salt;
@@ -54,34 +54,36 @@ static void generate_testvectors(const char *type, const uint32_t version) {
     context.free_cbk = myown_deallocator;
     context.flags = ARGON2_FLAG_GENKAT;
 
-    if(ARGON2_VERSION_10 == version || ARGON2_VERSION_NUMBER == version) {
-        context.version = version;
-    } else {
-        fatal("wrong Argon2 version number");
-    }
-
 #undef TEST_OUTLEN
 #undef TEST_PWDLEN
 #undef TEST_SALTLEN
 #undef TEST_SECRETLEN
 #undef TEST_ADLEN
 
-    if (!strcmp(type, "d")) {
-        argon2d_ctx(&context);
-    } else if (!strcmp(type, "i")) {
-        argon2i_ctx(&context);
-    } else
-        fatal("wrong Argon2 type");
+    argon2_ctx(&context, type);
 }
 
 int main(int argc, char *argv[]) {
-    /* Argon2 type */
-    const char *type = (argc > 1) ? argv[1] : "i";
+    /* Get and check Argon2 type */
+    const char *type_str = (argc > 1) ? argv[1] : "i";
+    argon2_type type = Argon2_i;
+    if (!strcmp(type_str, "d")) {
+        type = Argon2_d;
+    } else if (!strcmp(type_str, "i")) {
+        type = Argon2_i;
+    } else if (!strcmp(type_str, "id")) {
+        type = Argon2_id;
+    } else {
+        fatal("wrong Argon2 type");
+    }
 
-    /* Argon2 version number */
+    /* Get and check Argon2 version number */
     uint32_t version = ARGON2_VERSION_NUMBER;
     if(argc > 2) {
         version = strtoul(argv[2], NULL, 10);
+    }
+    if (ARGON2_VERSION_10 != version && ARGON2_VERSION_NUMBER != version) {
+        fatal("wrong Argon2 version number");
     }
 
     generate_testvectors(type, version);

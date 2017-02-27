@@ -209,7 +209,9 @@ void fill_segment_avx2(const argon2_instance_t *instance,
         return;
     }
 
-    data_independent_addressing = (instance->type == Argon2_i);
+    data_independent_addressing = (instance->type == Argon2_i) ||
+            (instance->type == Argon2_id && (position.pass == 0) &&
+             (position.slice < ARGON2_SYNC_POINTS / 2));
 
     if (data_independent_addressing) {
         init_block_value(&input_block, 0);

@@ -23,18 +23,8 @@ void initial_kat(const uint8_t *blockhash, const argon2_context *context,
     if (blockhash != NULL && context != NULL) {
         printf("=======================================\n");
 
-        switch (type) {
-        case Argon2_d:
-            printf("Argon2d version number %d\n", context->version);
-            break;
-
-        case Argon2_i:
-            printf("Argon2i version number %d\n", context->version);
-            break;
-
-        default:
-            break;
-        }
+        printf("%s version number %d\n", argon2_type2string(type, 1),
+               context->version);
 
         printf("=======================================\n");
 
