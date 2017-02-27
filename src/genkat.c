@@ -67,6 +67,7 @@ int main(int argc, char *argv[]) {
     /* Get and check Argon2 type */
     const char *type_str = (argc > 1) ? argv[1] : "i";
     argon2_type type = Argon2_i;
+    uint32_t version = ARGON2_VERSION_NUMBER;
     if (!strcmp(type_str, "d")) {
         type = Argon2_d;
     } else if (!strcmp(type_str, "i")) {
@@ -78,7 +79,6 @@ int main(int argc, char *argv[]) {
     }
 
     /* Get and check Argon2 version number */
-    uint32_t version = ARGON2_VERSION_NUMBER;
     if(argc > 2) {
         version = strtoul(argv[2], NULL, 10);
     }
