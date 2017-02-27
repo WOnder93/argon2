@@ -52,7 +52,7 @@ static void generate_testvectors(argon2_type type, const uint32_t version) {
     context.threads = lanes;
     context.allocate_cbk = myown_allocator;
     context.free_cbk = myown_deallocator;
-    context.flags = ARGON2_FLAG_GENKAT;
+    context.flags = ARGON2_DEFAULT_FLAGS | ARGON2_FLAG_GENKAT;
 
 #undef TEST_OUTLEN
 #undef TEST_PWDLEN

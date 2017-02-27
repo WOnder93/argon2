@@ -174,9 +174,9 @@ void blake2b_final(blake2b_state *S, void *out, size_t outlen)
     }
 
     memcpy(out, buffer, outlen);
-    secure_wipe_memory(buffer, sizeof(buffer));
-    secure_wipe_memory(S->buf, sizeof(S->buf));
-    secure_wipe_memory(S->h, sizeof(S->h));
+    clear_internal_memory(buffer, sizeof(buffer));
+    clear_internal_memory(S->buf, sizeof(S->buf));
+    clear_internal_memory(S->h, sizeof(S->h));
 }
 
 void blake2b_long(void *out, size_t outlen, const void *in, size_t inlen)
@@ -220,6 +220,6 @@ void blake2b_long(void *out, size_t outlen, const void *in, size_t inlen)
 
         memcpy(pout, out_buffer, toproduce);
 
-        secure_wipe_memory(out_buffer, sizeof(out_buffer));
+        clear_internal_memory(out_buffer, sizeof(out_buffer));
     }
 }
