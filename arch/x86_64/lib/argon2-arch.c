@@ -11,9 +11,9 @@
 #include "argon2-avx2.h"
 #include "argon2-avx512f.h"
 
-#include <x86intrin.h>
-
-#define rotr64(x, n) _lrotr(x, n)
+/* NOTE: there is no portable intrinsic for 64-bit rotate, but any
+ * sane compiler should be able to compile this into a ROR instruction: */
+#define rotr64(x, n) ((x) >> (n)) | ((x) << (64 - (n)))
 
 #include "argon2-template-64.h"
 
