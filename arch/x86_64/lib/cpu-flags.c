@@ -41,23 +41,23 @@ void cpu_flags_get(void)
     level_ext = get_cpuid(1, 0, &ebx, &ecx, &edx);
 
     if (level >= 1 && get_cpuid(0, 1, &ebx, &ecx, &edx)) {
-        if (edx & bit_SSE2) {
+        if (edx & (1 << 26)) {
             cpu_flags |= X86_64_FEATURE_SSE2;
         }
-        if (ecx & bit_SSSE3) {
+        if (ecx & (1 << 9)) {
             cpu_flags |= X86_64_FEATURE_SSSE3;
         }
     }
     if (level >= 7 && get_cpuid_count(0, 7, 0, &ebx, &ecx, &edx)) {
-        if (ebx & bit_AVX2) {
+        if (ebx & (1 << 5)) {
             cpu_flags |= X86_64_FEATURE_AVX2;
         }
-        if (ebx & bit_AVX512F) {
+        if (ebx & (1 << 16)) {
             cpu_flags |= X86_64_FEATURE_AVX512F;
         }
     }
     if (level_ext >= 1 && get_cpuid(1, 1, &ebx, &ecx, &edx)) {
-        if (ecx & bit_XOP) {
+        if (ecx & (1 << 11)) {
             cpu_flags |= X86_64_FEATURE_XOP;
         }
     }
