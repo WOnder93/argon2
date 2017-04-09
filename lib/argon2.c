@@ -69,6 +69,10 @@ int argon2_ctx(argon2_context *context, argon2_type type) {
     instance.type = type;
     instance.print_internals = !!(context->flags & ARGON2_FLAG_GENKAT);
 
+    if (instance.threads > instance.lanes) {
+        instance.threads = instance.lanes;
+    }
+
     /* 3. Initialization: Hashing inputs, allocating memory, filling first
      * blocks
      */
