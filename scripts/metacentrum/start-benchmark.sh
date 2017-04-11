@@ -40,11 +40,23 @@ dest_dir="$(pwd)"
 
 task_file="$(mktemp)"
 
+qsub_old="$(which qsub)"
+
+module add pbspro-client
+
+spec="#PBS -l nodes=1:ppn=1:mem=$(($max_m_cost / (1024 * 1024) + 1))gb:cl_$machine"
+qsub=qsub
+case "$machine" in pro:*)
+    machine="${machine#pro:}"
+    spec="#PBS -l select=1:ncpus=1:ngpus=1:mem=$(($max_m_cost / (1024 * 1024) + 1))gb:cl_$machine=True"
+    qsub="$qsub_old"
+esac
+
 cat >$task_file <<EOF
 #!/bin/bash
 #PBS -N argon2-cpu-$machine-$branch
 #PBS -l walltime=$duration
-#PBS -l nodes=1:ppn=$max_lanes:cl_$machine
+$spec
 #PBS -l mem=$(($max_m_cost / (1024 * 1024) + 1))gb
 $(if [ -n "$queue" ]; then echo "#PBS -q $queue"; fi)
 
@@ -70,6 +82,6 @@ bash scripts/run-benchmark.sh $max_t_cost $max_m_cost $max_lanes \
     >"$dest_dir/\$PBS_JOBID/benchmark-$machine-$branch.csv"
 EOF
 
-qsub "$task_file"
+"$qsub" "$task_file"
 
 rm -f "$task_file"
