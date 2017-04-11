@@ -57,7 +57,6 @@ cat >$task_file <<EOF
 #PBS -N argon2-cpu-$machine-$branch
 #PBS -l walltime=$duration
 $spec
-#PBS -l mem=$(($max_m_cost / (1024 * 1024) + 1))gb
 $(if [ -n "$queue" ]; then echo "#PBS -q $queue"; fi)
 
 module add cmake-3.6.1
