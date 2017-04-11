@@ -44,11 +44,11 @@ qsub_old="$(which qsub)"
 
 module add pbspro-client
 
-spec="#PBS -l nodes=1:ppn=1:mem=$(($max_m_cost / (1024 * 1024) + 1))gb:cl_$machine"
+spec="#PBS -l nodes=1:ppn=$max_lanes:mem=$(($max_m_cost / (1024 * 1024) + 1))gb:cl_$machine"
 qsub=qsub
 case "$machine" in pro:*)
     machine="${machine#pro:}"
-    spec="#PBS -l select=1:ncpus=1:ngpus=1:mem=$(($max_m_cost / (1024 * 1024) + 1))gb:cl_$machine=True"
+    spec="#PBS -l select=1:ncpus=$max_lanes:mem=$(($max_m_cost / (1024 * 1024) + 1))gb:cl_$machine=True"
     qsub="$qsub_old"
 esac
 
