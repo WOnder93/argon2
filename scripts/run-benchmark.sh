@@ -23,7 +23,7 @@ dirname="$(dirname "$0")"
 
 cd "$dirname/.." || exit 1
 
-echo "t_cost,m_cost,lanes,ms_i,ms_d"
+echo "t_cost,m_cost,lanes,ms_i,ms_d,ms_id"
 stdbuf -oL ./argon2-bench2 $max_t_cost $max_m_cost $max_lanes |
 stdbuf -oL tail -n +2 |
 while read line; do
