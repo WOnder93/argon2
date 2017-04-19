@@ -26,6 +26,15 @@ Supported architectures:
  * `x86_64` &ndash; 64-bit x86 architecture
  * `generic` &ndash; use generic C impementation
 
+## Using CMake
+
+To prepare the build environment, run:
+```bash
+cmake -DCMAKE_BUILD_TYPE=Release .
+```
+
+Then you can run `make` to build the library.
+
 ## Using QMake/Qt Creator
 A [QMake](http://doc.qt.io/qt-4.8/qmake-manual.html) project is also available in the `qmake` directory. You can open it in the [Qt Creator IDE](http://wiki.qt.io/Category:Tools::QtCreator) or build it from terminal:
 ```bash
