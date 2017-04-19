@@ -61,3 +61,10 @@
 
 # Vim
 *.swp
+
+# CMake
+CMakeFiles/
+*.cmake
+CMakeCache.txt
+Makefile
+
