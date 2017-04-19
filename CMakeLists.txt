@@ -48,6 +48,9 @@ if(CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64)
             arch/x86_64/lib/argon2-${FEATURE}.c
         )
         target_link_libraries(argon2-${FEATURE} PRIVATE argon2-internal)
+        set_target_properties(argon2-${FEATURE}
+            PROPERTIES POSITION_INDEPENDENT_CODE True
+        )
 
         message("-- Detecting feature '${FEATURE}'...")
         file(READ arch/x86_64/src/test-feature-${FEATURE}.c SOURCE_CODE)
