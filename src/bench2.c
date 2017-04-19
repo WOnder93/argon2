@@ -5,7 +5,6 @@
 #include <math.h>
 
 #include "argon2.h"
-#include "argon2-opt.h"
 
 #include "timing.h"
 

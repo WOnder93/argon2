@@ -3,7 +3,7 @@
 
 #include "impl-select.h"
 
-#include "argon2-opt.h"
+#include "argon2.h"
 
 #define log_maybe(file, args...) \
     do { \

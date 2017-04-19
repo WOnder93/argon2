@@ -15,6 +15,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <limits.h>
 
 #if defined(__cplusplus)
@@ -424,6 +425,18 @@ ARGON2_PUBLIC const char *argon2_error_message(int error_code);
 ARGON2_PUBLIC size_t argon2_encodedlen(uint32_t t_cost, uint32_t m_cost,
                                        uint32_t parallelism, uint32_t saltlen,
                                        uint32_t hashlen, argon2_type type);
+
+/* signals availability of argon2_select_impl: */
+#define ARGON2_SELECTABLE_IMPL
+
+/**
+ * Selects the fastest available optimized implementation.
+ * @param out The file for debug output (e. g. stderr; pass NULL for no
+ * debug output)
+ * @param prefix What to print before each line; NULL is equivalent to empty
+ * string
+ */
+ARGON2_PUBLIC void argon2_select_impl(FILE *out, const char *prefix);
 
 #if defined(__cplusplus)
 }

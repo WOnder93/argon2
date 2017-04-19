@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "argon2.h"
-#include "argon2-opt.h"
 
 static void fatal(const char *error) {
     fprintf(stderr, "Error: %s\n", error);

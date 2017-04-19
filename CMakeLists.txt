@@ -117,7 +117,6 @@ add_test(test argon2-test)
 install(TARGETS argon2 DESTINATION ${LIBRARY_INSTALL_DIR})
 install(FILES
     include/argon2.h
-    include/argon2-opt.h
     DESTINATION ${INCLUDE_INSTALL_DIR}
 )
 install(TARGETS argon2-exec DESTINATION ${BINARY_INSTALL_DIR})

@@ -7,7 +7,6 @@
 #include <assert.h>
 
 #include "argon2.h"
-#include "argon2-opt.h"
 
 #define OUT_LEN 32
 #define ENCODED_LEN 108

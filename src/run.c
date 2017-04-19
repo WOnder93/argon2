@@ -21,7 +21,6 @@
 #include <time.h>
 
 #include "argon2.h"
-#include "argon2-opt.h"
 #include "core.h"
 
 #define T_COST_DEF 3
