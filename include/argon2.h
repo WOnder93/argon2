@@ -438,6 +438,22 @@ ARGON2_PUBLIC size_t argon2_encodedlen(uint32_t t_cost, uint32_t m_cost,
  */
 ARGON2_PUBLIC void argon2_select_impl(FILE *out, const char *prefix);
 
+/* signals support for passing preallocated memory: */
+#define ARGON2_PREALLOCATED_MEMORY
+
+ARGON2_PUBLIC size_t argon2_memory_size(uint32_t m_cost, uint32_t parallelism);
+
+/**
+ * Function that performs memory-hard hashing with certain degree of parallelism
+ * @param context       Pointer to the Argon2 internal structure
+ * @param type          The Argon2 type
+ * @param memory        Preallocated memory for blocks (or NULL)
+ * @param memory_size   The size of preallocated memory
+ * @return Error code if smth is wrong, ARGON2_OK otherwise
+ */
+ARGON2_PUBLIC int argon2_ctx_mem(argon2_context *context, argon2_type type,
+                                 void *memory, size_t memory_size);
+
 #if defined(__cplusplus)
 }
 #endif

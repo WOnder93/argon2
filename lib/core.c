@@ -78,40 +78,51 @@ static void store_block(void *output, const block *src) {
 
 /***************Memory functions*****************/
 
-int allocate_memory(const argon2_context *context, uint8_t **memory,
-                    size_t num, size_t size) {
-    size_t memory_size = num * size;
-    if (memory == NULL) {
-        return ARGON2_MEMORY_ALLOCATION_ERROR;
+int allocate_memory(const argon2_context *context,
+                    argon2_instance_t *instance) {
+    size_t blocks = instance->memory_blocks;
+    size_t memory_size = blocks * ARGON2_BLOCK_SIZE;
+
+    /* 0. Check for memory supplied by user: */
+    /* NOTE: Sufficient memory size is already checked in argon2_ctx_mem() */
+    if (instance->memory != NULL) {
+        return ARGON2_OK;
     }
 
     /* 1. Check for multiplication overflow */
-    if (size != 0 && memory_size / size != num) {
+    if (blocks != 0 && memory_size / ARGON2_BLOCK_SIZE != blocks) {
         return ARGON2_MEMORY_ALLOCATION_ERROR;
     }
 
     /* 2. Try to allocate with appropriate allocator */
     if (context->allocate_cbk) {
-        (context->allocate_cbk)(memory, memory_size);
+        (context->allocate_cbk)((uint8_t **)&instance->memory, memory_size);
     } else {
-        *memory = malloc(memory_size);
+        instance->memory = malloc(memory_size);
     }
 
-    if (*memory == NULL) {
+    if (instance->memory == NULL) {
         return ARGON2_MEMORY_ALLOCATION_ERROR;
     }
 
     return ARGON2_OK;
 }
 
-void free_memory(const argon2_context *context, uint8_t *memory,
-                 size_t num, size_t size) {
-    size_t memory_size = num*size;
-    clear_internal_memory(memory, memory_size);
+void free_memory(const argon2_context *context,
+                 const argon2_instance_t *instance) {
+    size_t memory_size = instance->memory_blocks * ARGON2_BLOCK_SIZE;
+
+    clear_internal_memory(instance->memory, memory_size);
+
+    if (instance->keep_memory) {
+        /* user-supplied memory -- do not free */
+        return;
+    }
+
     if (context->free_cbk) {
-        (context->free_cbk)(memory, memory_size);
+        (context->free_cbk)((uint8_t *)instance->memory, memory_size);
     } else {
-        free(memory);
+        free(instance->memory);
     }
 }
 
@@ -165,8 +176,7 @@ void finalize(const argon2_context *context, argon2_instance_t *instance) {
             print_tag(context->out, context->outlen);
         }
 
-        free_memory(context, (uint8_t *)instance->memory,
-                    instance->memory_blocks, sizeof(block));
+        free_memory(context, instance);
     }
 }
 
@@ -594,8 +604,7 @@ int initialize(argon2_instance_t *instance, argon2_context *context) {
 
     /* 1. Memory allocation */
 
-    result = allocate_memory(context, (uint8_t **)&(instance->memory),
-                             instance->memory_blocks, sizeof(block));
+    result = allocate_memory(context, instance);
     if (result != ARGON2_OK) {
         return result;
     }

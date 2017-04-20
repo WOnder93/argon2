@@ -19,24 +19,6 @@
 #define BENCH_OUTLEN 16
 #define BENCH_INLEN 16
 
-static uint8_t *static_memory = NULL;
-static size_t static_memory_size = 0;
-
-static int allocate_static(uint8_t **memory, size_t bytes_to_allocate)
-{
-    if (static_memory_size < bytes_to_allocate) {
-        return ARGON2_MEMORY_ALLOCATION_ERROR;
-    }
-    *memory = static_memory;
-    return ARGON2_OK;
-}
-
-static void deallocate_static(uint8_t *memory, size_t bytes_to_allocate)
-{
-    (void)memory;
-    (void)bytes_to_allocate;
-}
-
 static double min(const double *samples, size_t count)
 {
     size_t i;
@@ -49,7 +31,8 @@ static double min(const double *samples, size_t count)
     return min;
 }
 
-static int benchmark(uint32_t t_cost, uint32_t m_cost, uint32_t p)
+static int benchmark(void *memory, size_t memory_size,
+                     uint32_t t_cost, uint32_t m_cost, uint32_t p)
 {
     static const unsigned char PASSWORD[BENCH_OUTLEN] = { 0 };
     static const unsigned char SALT[BENCH_INLEN] = { 1 };
@@ -80,8 +63,8 @@ static int benchmark(uint32_t t_cost, uint32_t m_cost, uint32_t p)
     ctx.m_cost = m_cost;
     ctx.lanes = ctx.threads = p;
     ctx.version = ARGON2_VERSION_NUMBER;
-    ctx.allocate_cbk = allocate_static;
-    ctx.free_cbk = deallocate_static;
+    ctx.allocate_cbk = NULL;
+    ctx.free_cbk = NULL;
     ctx.flags = ARGON2_DEFAULT_FLAGS;
 
     bench_samples = (BENCH_MIN_PASSES * p) / (t_cost * m_cost);
@@ -92,7 +75,7 @@ static int benchmark(uint32_t t_cost, uint32_t m_cost, uint32_t p)
     }
     for (i = 0; i < bench_samples; i++) {
         timestamp_store(&start);
-        res = argon2d_ctx(&ctx);
+        res = argon2_ctx_mem(&ctx, Argon2_d, memory, memory_size);
         timestamp_store(&end);
         if (res != ARGON2_OK) {
             return res;
@@ -103,7 +86,7 @@ static int benchmark(uint32_t t_cost, uint32_t m_cost, uint32_t p)
 
     for (i = 0; i < bench_samples; i++) {
         timestamp_store(&start);
-        res = argon2i_ctx(&ctx);
+        res = argon2_ctx_mem(&ctx, Argon2_i, memory, memory_size);
         timestamp_store(&end);
         if (res != ARGON2_OK) {
             return res;
@@ -114,7 +97,7 @@ static int benchmark(uint32_t t_cost, uint32_t m_cost, uint32_t p)
 
     for (i = 0; i < bench_samples; i++) {
         timestamp_store(&start);
-        res = argon2id_ctx(&ctx);
+        res = argon2_ctx_mem(&ctx, Argon2_id, memory, memory_size);
         timestamp_store(&end);
         if (res != ARGON2_OK) {
             return res;
@@ -168,14 +151,14 @@ int main(int argc, const char * const *argv)
 
     argon2_select_impl(stderr, "[libargon2] ");
 
-    static_memory_size = (size_t)max_m_cost * (size_t)ARGON2_BLOCK_SIZE;
-    static_memory = malloc(static_memory_size);
-    if (static_memory == NULL) {
+    size_t memory_size = (size_t)max_m_cost * (size_t)ARGON2_BLOCK_SIZE;
+    void *memory = malloc(memory_size);
+    if (memory == NULL) {
         fprintf(stderr, "ERROR: Memory allocation failed!\n");
         return 1;
     }
     /* make sure the whole memory gets mapped to physical pages: */
-    memset(static_memory, 0xAB, static_memory_size);
+    memset(memory, 0xAB, memory_size);
 
     printf("%8s%16s%8s%16s%16s%16s\n", "t_cost", "m_cost", "threads",
            "Argon2d (ms)", "Argon2i (ms)", "Argon2id (ms)");
@@ -183,14 +166,14 @@ int main(int argc, const char * const *argv)
         uint32_t min_m_cost = max_p * ARGON2_SYNC_POINTS * 2;
         for (m_cost = min_m_cost; m_cost <= max_m_cost; m_cost *= 2) {
             for (p = 1; p <= max_p; p *= 2) {
-                res = benchmark(t_cost, m_cost, p);
+                res = benchmark(memory, memory_size, t_cost, m_cost, p);
                 if (res != 0) {
-                    free(static_memory);
+                    free(memory);
                     return res;
                 }
             }
         }
     }
-    free(static_memory);
+    free(memory);
     return 0;
 }

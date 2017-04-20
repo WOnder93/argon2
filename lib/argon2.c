@@ -32,7 +32,30 @@ const char *argon2_type2string(argon2_type type, int uppercase) {
     return NULL;
 }
 
-int argon2_ctx(argon2_context *context, argon2_type type) {
+static void argon2_compute_memory_blocks(uint32_t *memory_blocks,
+                                         uint32_t *segment_length,
+                                         uint32_t m_cost, uint32_t lanes)
+{
+    /* Minimum memory_blocks = 8L blocks, where L is the number of lanes */
+    *memory_blocks = m_cost;
+    if (*memory_blocks < 2 * ARGON2_SYNC_POINTS * lanes) {
+        *memory_blocks = 2 * ARGON2_SYNC_POINTS * lanes;
+    }
+
+    *segment_length = *memory_blocks / (lanes * ARGON2_SYNC_POINTS);
+    /* Ensure that all segments have equal length */
+    *memory_blocks = *segment_length * (lanes * ARGON2_SYNC_POINTS);
+}
+
+size_t argon2_memory_size(uint32_t m_cost, uint32_t parallelism) {
+    uint32_t memory_blocks, segment_length;
+    argon2_compute_memory_blocks(&memory_blocks, &segment_length, m_cost,
+                                 parallelism);
+    return memory_blocks * ARGON2_BLOCK_SIZE;
+}
+
+int argon2_ctx_mem(argon2_context *context, argon2_type type, void *memory,
+                   size_t memory_size) {
     /* 1. Validate all inputs */
     int result = validate_inputs(context);
     uint32_t memory_blocks, segment_length;
@@ -47,19 +70,17 @@ int argon2_ctx(argon2_context *context, argon2_type type) {
     }
 
     /* 2. Align memory size */
-    /* Minimum memory_blocks = 8L blocks, where L is the number of lanes */
-    memory_blocks = context->m_cost;
+    argon2_compute_memory_blocks(&memory_blocks, &segment_length,
+                                 context->m_cost, context->lanes);
 
-    if (memory_blocks < 2 * ARGON2_SYNC_POINTS * context->lanes) {
-        memory_blocks = 2 * ARGON2_SYNC_POINTS * context->lanes;
+    /* check for sufficient memory size: */
+    if (memory != NULL && (memory_size % ARGON2_BLOCK_SIZE != 0 ||
+                           memory_size / ARGON2_BLOCK_SIZE < memory_blocks)) {
+        return ARGON2_MEMORY_ALLOCATION_ERROR;
     }
 
-    segment_length = memory_blocks / (context->lanes * ARGON2_SYNC_POINTS);
-    /* Ensure that all segments have equal length */
-    memory_blocks = segment_length * (context->lanes * ARGON2_SYNC_POINTS);
-
     instance.version = context->version;
-    instance.memory = NULL;
+    instance.memory = (block *)memory;
     instance.passes = context->t_cost;
     instance.memory_blocks = memory_blocks;
     instance.segment_length = segment_length;
@@ -68,6 +89,7 @@ int argon2_ctx(argon2_context *context, argon2_type type) {
     instance.threads = context->threads;
     instance.type = type;
     instance.print_internals = !!(context->flags & ARGON2_FLAG_GENKAT);
+    instance.keep_memory = memory != NULL;
 
     if (instance.threads > instance.lanes) {
         instance.threads = instance.lanes;
@@ -92,6 +114,10 @@ int argon2_ctx(argon2_context *context, argon2_type type) {
     finalize(context, &instance);
 
     return ARGON2_OK;
+}
+
+int argon2_ctx(argon2_context *context, argon2_type type) {
+    return argon2_ctx_mem(context, type, NULL, 0);
 }
 
 int argon2_hash(const uint32_t t_cost, const uint32_t m_cost,

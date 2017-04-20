@@ -81,6 +81,7 @@ typedef struct Argon2_instance_t {
     uint32_t threads;
     argon2_type type;
     int print_internals; /* whether to print the memory blocks */
+    int keep_memory;
     argon2_context *context_ptr; /* points back to original context */
 } argon2_instance_t;
 
@@ -106,24 +107,20 @@ typedef struct Argon2_thread_data {
 /* Allocates memory to the given pointer, uses the appropriate allocator as
  * specified in the context. Total allocated memory is num*size.
  * @param context argon2_context which specifies the allocator
- * @param memory pointer to the pointer to the memory
- * @param size the size in bytes for each element to be allocated
- * @param num the number of elements to be allocated
- * @return ARGON2_OK if @memory is a valid pointer and memory is allocated
+ * @param instance the Argon2 instance
+ * @return ARGON2_OK if memory is allocated successfully
  */
-int allocate_memory(const argon2_context *context, uint8_t **memory,
-                    size_t num, size_t size);
+int allocate_memory(const argon2_context *context,
+                    argon2_instance_t *instance);
 
 /*
  * Frees memory at the given pointer, uses the appropriate deallocator as
  * specified in the context. Also cleans the memory using clear_internal_memory.
  * @param context argon2_context which specifies the deallocator
- * @param memory pointer to buffer to be freed
- * @param size the size in bytes for each element to be deallocated
- * @param num the number of elements to be deallocated
+ * @param instance the Argon2 instance
  */
-void free_memory(const argon2_context *context, uint8_t *memory,
-                 size_t num, size_t size);
+void free_memory(const argon2_context *context,
+                 const argon2_instance_t *instance);
 
 /* Function that securely cleans the memory. This ignores any flags set
  * regarding clearing memory. Usually one just calls clear_internal_memory.
