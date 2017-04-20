@@ -26,7 +26,6 @@ SOURCES += \
 
 HEADERS += \
     $$ARGON2_ROOT/include/argon2.h \
-    $$ARGON2_ROOT/include/argon2-opt.h \
     $$ARGON2_ROOT/lib/argon2-template-64.h \
     $$ARGON2_ROOT/lib/core.h \
     $$ARGON2_ROOT/lib/encoding.h \
