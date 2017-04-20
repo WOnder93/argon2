@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-include_HEADERS = include/argon2.h include/argon2-opt.h
+include_HEADERS = include/argon2.h
 lib_LTLIBRARIES = libargon2.la
 noinst_LTLIBRARIES =
 
