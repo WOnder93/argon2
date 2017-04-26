@@ -73,7 +73,7 @@ static __m256i f(__m256i x, __m256i y)
         B1 = ror64_63(B1); \
     } while ((void)0, 0)
 
-#define DIAGONALIZE(A0, B0, C0, D0, A1, B1, C1, D1) \
+#define DIAGONALIZE1(A0, B0, C0, D0, A1, B1, C1, D1) \
     do { \
         B0 = _mm256_permute4x64_epi64(B0, _MM_SHUFFLE(0, 3, 2, 1)); \
         B1 = _mm256_permute4x64_epi64(B1, _MM_SHUFFLE(0, 3, 2, 1)); \
@@ -85,7 +85,7 @@ static __m256i f(__m256i x, __m256i y)
         D1 = _mm256_permute4x64_epi64(D1, _MM_SHUFFLE(2, 1, 0, 3)); \
     } while ((void)0, 0)
 
-#define UNDIAGONALIZE(A0, B0, C0, D0, A1, B1, C1, D1) \
+#define UNDIAGONALIZE1(A0, B0, C0, D0, A1, B1, C1, D1) \
     do { \
         B0 = _mm256_permute4x64_epi64(B0, _MM_SHUFFLE(2, 1, 0, 3)); \
         B1 = _mm256_permute4x64_epi64(B1, _MM_SHUFFLE(2, 1, 0, 3)); \
@@ -97,39 +97,66 @@ static __m256i f(__m256i x, __m256i y)
         D1 = _mm256_permute4x64_epi64(D1, _MM_SHUFFLE(0, 3, 2, 1)); \
     } while ((void)0, 0)
 
-#define BLAKE2_ROUND(A0, B0, C0, D0, A1, B1, C1, D1) \
+#define DIAGONALIZE2(A0, B0, C0, D0, A1, B1, C1, D1) \
     do { \
-        G1(A0, B0, C0, D0, A1, B1, C1, D1); \
-        G2(A0, B0, C0, D0, A1, B1, C1, D1); \
+        __m256i tmp1, tmp2; \
+        tmp1 = _mm256_blend_epi32(B0, B1, 0xCC); \
+        tmp2 = _mm256_blend_epi32(B0, B1, 0x33); \
+        B1 = _mm256_permute4x64_epi64(tmp1, _MM_SHUFFLE(2,3,0,1)); \
+        B0 = _mm256_permute4x64_epi64(tmp2, _MM_SHUFFLE(2,3,0,1)); \
 \
-        DIAGONALIZE(A0, B0, C0, D0, A1, B1, C1, D1); \
+        tmp1 = C0; \
+        C0 = C1; \
+        C1 = tmp1; \
 \
-        G1(A0, B0, C0, D0, A1, B1, C1, D1); \
-        G2(A0, B0, C0, D0, A1, B1, C1, D1); \
-\
-        UNDIAGONALIZE(A0, B0, C0, D0, A1, B1, C1, D1); \
+        tmp1 = _mm256_blend_epi32(D0, D1, 0xCC); \
+        tmp2 = _mm256_blend_epi32(D0, D1, 0x33); \
+        D0 = _mm256_permute4x64_epi64(tmp1, _MM_SHUFFLE(2,3,0,1)); \
+        D1 = _mm256_permute4x64_epi64(tmp2, _MM_SHUFFLE(2,3,0,1)); \
     } while ((void)0, 0)
 
-#define SWAP_HALVES(A0, A1) \
+#define UNDIAGONALIZE2(A0, B0, C0, D0, A1, B1, C1, D1) \
     do { \
-        __m256i t0, t1; \
-        t0 = _mm256_permute2x128_si256(A0, A1, _MM_SHUFFLE(0, 2, 0, 0)); \
-        t1 = _mm256_permute2x128_si256(A0, A1, _MM_SHUFFLE(0, 3, 0, 1)); \
-        A0 = t0; \
-        A1 = t1; \
-    } while((void)0, 0)
+        __m256i tmp1, tmp2; \
+        tmp1 = _mm256_blend_epi32(B0, B1, 0xCC); \
+        tmp2 = _mm256_blend_epi32(B0, B1, 0x33); \
+        B0 = _mm256_permute4x64_epi64(tmp1, _MM_SHUFFLE(2,3,0,1)); \
+        B1 = _mm256_permute4x64_epi64(tmp2, _MM_SHUFFLE(2,3,0,1)); \
+\
+        tmp1 = C0; \
+        C0 = C1; \
+        C1 = tmp1; \
+\
+        tmp1 = _mm256_blend_epi32(D0, D1, 0xCC); \
+        tmp2 = _mm256_blend_epi32(D0, D1, 0x33); \
+        D1 = _mm256_permute4x64_epi64(tmp1, _MM_SHUFFLE(2,3,0,1)); \
+        D0 = _mm256_permute4x64_epi64(tmp2, _MM_SHUFFLE(2,3,0,1)); \
+    } while ((void)0, 0)
+
+#define BLAKE2_ROUND1(A0, B0, C0, D0, A1, B1, C1, D1) \
+    do { \
+        G1(A0, B0, C0, D0, A1, B1, C1, D1); \
+        G2(A0, B0, C0, D0, A1, B1, C1, D1); \
+\
+        DIAGONALIZE1(A0, B0, C0, D0, A1, B1, C1, D1); \
+\
+        G1(A0, B0, C0, D0, A1, B1, C1, D1); \
+        G2(A0, B0, C0, D0, A1, B1, C1, D1); \
+\
+        UNDIAGONALIZE1(A0, B0, C0, D0, A1, B1, C1, D1); \
+    } while ((void)0, 0)
 
 #define BLAKE2_ROUND2(A0, A1, B0, B1, C0, C1, D0, D1) \
     do { \
-        SWAP_HALVES(A0, A1); \
-        SWAP_HALVES(B0, B1); \
-        SWAP_HALVES(C0, C1); \
-        SWAP_HALVES(D0, D1); \
-        BLAKE2_ROUND(A0, B0, C0, D0, A1, B1, C1, D1); \
-        SWAP_HALVES(A0, A1); \
-        SWAP_HALVES(B0, B1); \
-        SWAP_HALVES(C0, C1); \
-        SWAP_HALVES(D0, D1); \
+        G1(A0, B0, C0, D0, A1, B1, C1, D1); \
+        G2(A0, B0, C0, D0, A1, B1, C1, D1); \
+\
+        DIAGONALIZE2(A0, B0, C0, D0, A1, B1, C1, D1); \
+\
+        G1(A0, B0, C0, D0, A1, B1, C1, D1); \
+        G2(A0, B0, C0, D0, A1, B1, C1, D1); \
+\
+        UNDIAGONALIZE2(A0, B0, C0, D0, A1, B1, C1, D1); \
     } while ((void)0, 0)
 
 enum {
@@ -158,7 +185,7 @@ static void fill_block(__m256i *s, const block *ref_block, block *next_block,
     }
 
     for (i = 0; i < 4; ++i) {
-        BLAKE2_ROUND(
+        BLAKE2_ROUND1(
             s[8 * i + 0], s[8 * i + 1], s[8 * i + 2], s[8 * i + 3],
             s[8 * i + 4], s[8 * i + 5], s[8 * i + 6], s[8 * i + 7]);
     }
