@@ -118,7 +118,7 @@ argon2_SOURCES = src/run.c lib/core.h
 argon2_genkat_LDADD = libargon2.la
 argon2_genkat_SOURCES = src/genkat.c
 
-argon2_bench2_LDADD = libargon2.la
+argon2_bench2_LDADD = libargon2.la -lrt
 argon2_bench2_SOURCES = src/bench2.c src/timing.h
 
 argon2_test_LDADD = libargon2.la
