@@ -1,4 +1,4 @@
-# Argon2
+# Argon2 [![Build Status](https://travis-ci.org/WOnder93/argon2.svg?branch=master)](https://travis-ci.org/WOnder93/argon2)
 A multi-arch library implementing the Argon2 password hashing algorithm.
 
 This project is based on the [original source code](https://github.com/P-H-C/phc-winner-argon2) by the Argon2 authors. The goal of this project is to provide efficient Argon2 implementations for various HW architectures (x86, SSE, ARM, PowerPC, ...).
