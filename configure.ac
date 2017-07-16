@@ -44,22 +44,22 @@ AM_CONDITIONAL([ARCH_GENERIC], [test "$ARCH" = 'generic'])
 # --------------------------
 AC_DEFUN([AX_CHECK_COMPILER_FEATURE], [{
     AX_CHECK_COMPILE_FLAG([-m$2], [HAVE_FLAG=1], [HAVE_FLAG=0])
+    HAVE_FEATURE=0
     AS_IF([test "$HAVE_FLAG" = '1'], [{
         AC_MSG_CHECKING("whether C compiler supports $1 with -m$2...")
 
         CFLAGS_BACKUP="$CFLAGS"
         CFLAGS="-m$2"
 
-        AC_COMPILE_IFELSE([AC_LANG_SOURCE([$3])],
-            [HAVE_FEATURE=1], [HAVE_FEATURE=0])
+        AC_COMPILE_IFELSE([AC_LANG_SOURCE([$3])], [HAVE_FEATURE=1])
 
         CFLAGS="$CFLAGS_BACKUP"
         AS_IF([test "$HAVE_FEATURE" = '1'], [RESULT='yes'], [RESULT='no'])
         AC_MSG_RESULT([$RESULT])
 
-        AM_CONDITIONAL([HAVE_$1], [test "$HAVE_FEATURE" = '1'])
-        HAVE_$1=HAVE_FEATURE
     }])
+    HAVE_$1=HAVE_FEATURE
+    AM_CONDITIONAL([HAVE_$1], [test "$HAVE_FEATURE" = '1'])
 }])
 
 AX_CHECK_COMPILER_FEATURE([SSE2], [sse2], [[
