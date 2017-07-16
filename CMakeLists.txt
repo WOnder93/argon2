@@ -7,6 +7,7 @@ set(LIBRARY_INSTALL_DIR /usr/local/lib)
 set(INCLUDE_INSTALL_DIR /usr/local/include)
 set(CMAKE_C_STANDARD 90)
 set(CMAKE_C_STANDARD_REQUIRED ON)
+enable_testing()
 
 include(CheckCSourceCompiles)
 find_package(Threads REQUIRED)
