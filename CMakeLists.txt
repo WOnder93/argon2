@@ -107,7 +107,7 @@ target_link_libraries(argon2-genkat argon2)
 
 add_executable(argon2-bench2 src/bench2.c)
 target_include_directories(argon2-bench2 PRIVATE src)
-target_link_libraries(argon2-bench2 argon2)
+target_link_libraries(argon2-bench2 argon2 -lrt)
 
 add_executable(argon2-test tests/test.c)
 target_include_directories(argon2-test PRIVATE tests)
