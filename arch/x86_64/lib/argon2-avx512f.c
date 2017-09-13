@@ -1,4 +1,4 @@
-#include "argon2-avx2.h"
+#include "argon2-avx512f.h"
 
 #ifdef HAVE_AVX512F
 #include <stdint.h>
