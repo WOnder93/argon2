@@ -18,17 +18,21 @@
 #include <stdio.h>
 #include <limits.h>
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 /* Symbols visibility control */
 #ifdef A2_VISCTL
 #define ARGON2_PUBLIC __attribute__((visibility("default")))
 #elif _MSC_VER
+#ifdef argon2_EXPORTS
 #define ARGON2_PUBLIC __declspec(dllexport)
 #else
+#define ARGON2_PUBLIC __declspec(dllimport)
+#endif
+#else
 #define ARGON2_PUBLIC
+#endif // A2_VISCTL
+
+#if defined(__cplusplus)
+extern "C" {
 #endif
 
 /*
