@@ -19,7 +19,7 @@
 #define BENCH_OUTLEN 16
 #define BENCH_INLEN 16
 
-static double min(const double *samples, size_t count)
+static double pick_min(const double *samples, size_t count)
 {
     size_t i;
     double min = INFINITY;
@@ -106,9 +106,9 @@ static int benchmark(void *memory, size_t memory_size,
         ms_id[i] = timestamp_span_ms(&start, &end);
     }
 
-    ms_d_final = min(ms_d, bench_samples);
-    ms_i_final = min(ms_i, bench_samples);
-    ms_id_final = min(ms_id, bench_samples);
+    ms_d_final = pick_min(ms_d, bench_samples);
+    ms_i_final = pick_min(ms_i, bench_samples);
+    ms_id_final = pick_min(ms_id, bench_samples);
 
     printf("%8lu%16lu%8lu%16.6lf%16.6lf%16.6lf\n",
            (unsigned long)t_cost, (unsigned long)m_cost, (unsigned long)p,
