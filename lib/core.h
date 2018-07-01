@@ -134,7 +134,7 @@ void secure_wipe_memory(void *v, size_t n);
  * @param mem Pointer to the memory
  * @param s Memory size in bytes
  */
-ARGON2_API void clear_internal_memory(void *v, size_t n);
+ARGON2_PUBLIC void clear_internal_memory(void *v, size_t n);
 
 /*
  * Computes absolute position of reference block in the lane following a skewed

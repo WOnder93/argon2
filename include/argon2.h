@@ -13,32 +13,26 @@
 #ifndef ARGON2_H
 #define ARGON2_H
 
-#ifdef WIN32
-#ifdef argon2_EXPORTS
-#define ARGON2_API __declspec(dllexport)
-#else
-#define ARGON2_API __declspec(dllimport)
-#endif
-#else
-#define ARGON2_API
-#endif // WIN32
-
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <limits.h>
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 /* Symbols visibility control */
 #ifdef A2_VISCTL
 #define ARGON2_PUBLIC __attribute__((visibility("default")))
 #elif _MSC_VER
+#ifdef argon2_EXPORTS
 #define ARGON2_PUBLIC __declspec(dllexport)
 #else
+#define ARGON2_PUBLIC __declspec(dllimport)
+#endif
+#else
 #define ARGON2_PUBLIC
+#endif // A2_VISCTL
+
+#if defined(__cplusplus)
+extern "C" {
 #endif
 
 /*
