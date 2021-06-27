@@ -40,7 +40,7 @@ A [QMake](http://doc.qt.io/qt-4.8/qmake-manual.html) project is also available i
 ```bash
 cd qmake
 # see table below for the list of possible ARCH and CONFIG values
-qmake ARCH=... CONFIG+=...
+qmake -recursive ARCH=... CONFIG+=...
 make
 ```
 
