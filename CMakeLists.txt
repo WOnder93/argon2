@@ -43,7 +43,7 @@ set_property(TARGET argon2 APPEND PROPERTY
     COMPATIBLE_INTERFACE_STRING ARGON2_MAJOR_VERSION
 )
 
-if(CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64)
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64)$")
     function(add_feature_impl FEATURE GCC_FLAG DEF)
         add_library(argon2-${FEATURE} STATIC
             arch/x86_64/lib/argon2-${FEATURE}.c
